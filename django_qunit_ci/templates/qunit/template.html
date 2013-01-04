@@ -1,0 +1,26 @@
+{% load staticfiles %}
+<!DOCTYPE html> 
+<html data-testing="1">
+  <head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'qunit.css' %}" type="text/css" media="screen">  
+    <script type="text/javascript" src="{% static 'qunit.js' %}"></script>     
+    <script type="text/javascript" src="{% static 'qunit-config.js' %}"></script>     
+    {% for dep in dependencies %}
+        <script type="text/javascript" src="{% static dep %}"></script>
+    {% endfor %}
+    <script type="text/javascript" src="{% static test_file %}"></script>
+  </head>
+  <body>
+    <h1 id="qunit-header">{{ title }}</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests">
+    </ol>
+    <div id="qunit-fixture">
+    {% for fixture in fixtures %}
+        {% include fixture %}
+    {% endfor %}
+    </div>
+  </body>
+</html>
