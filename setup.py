@@ -13,6 +13,12 @@ setup(
     zip_safe=False,
     install_requires=[
         'Django>=1.4',
+        'django-nose',
         'requests',
     ],
+    entry_points={
+        'nose.plugins.0.10': [
+            'django-qunit = django_qunit_ci.nose_plugin:QUnitPlugin'
+        ]
+    },
 )

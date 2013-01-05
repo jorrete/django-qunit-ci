@@ -7,7 +7,7 @@ if (phantom.args.length === 0) {
 }
 
 var phantomjsServerPort = phantom.args[0],
-    screenshotDir = phatom.args[1],
+    screenshotDir = phantom.args[1],
     separator = require('fs').separator,
     server,
     service;
@@ -28,6 +28,9 @@ function createPage() {
     else {
       console.log(msg);
     }
+  };
+  page.onError = function (msg, trace) {
+    console.log(msg + ': ' + JSON.stringify(trace));
   };
   return page;
 }
@@ -64,7 +67,7 @@ function listTests(url, response) {
     if (status === 'success') {
       responseText = page.evaluate(function () {
         try {
-          return JSON.stringify(DjangoQUnit.modules);
+          return JSON.stringify(QUnit.Django.modules);
         }
         catch (e) {
           return '';
@@ -90,12 +93,12 @@ function runTests(url, response) {
       // Wait for the tests to finish
       waitFor(function () {
         return page.evaluate(function () {
-          return window.DjangoQUnit && window.DjangoQUnit.done;
+          return window.QUnit.Django && window.QUnit.Django.done;
         });
       }, function () {
         responseText = page.evaluate(function () {
           try {
-            return JSON.stringify(DjangoQUnit.results);
+            return JSON.stringify(QUnit.Django.results);
           }
           catch (e) {
             return '';
@@ -125,6 +128,7 @@ service = server.listen(phantomjsServerPort, function (request, response) {
     response.statusCode = 200;
     response.write('');
     response.close();
+    return;
   }
   params = JSON.parse(request.post);
   if (params.action === 'list') {

@@ -1,117 +1,107 @@
-import os
-import time
-from subprocess import Popen
-from unittest import TestSuite
-
-from django.test import LiveServerTestCase
-
+import json
 import requests
+import urllib
+
+from django.core.urlresolvers import reverse
+from django.test import LiveServerTestCase
 
 from django_qunit_ci.conf import settings
 
 PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 PHANTOMJS_TIMEOUT = 10
 
-# Reference to the PhantomJS subprocess
-phantomjs = None
+registry = {}
 
 
-def start_phantomjs():
-    """ Start PhantomJS if it isn't already running """
-    if phantomjs:
-        return
-    phantomjs = Popen([
-        settings.QUNIT_PHANTOMJS_PATH,
-        os.path.join(os.path.dirname(__file__), 'run-qunit.js'),
-        settings.QUNIT_PHANTOMJS_PORT
-    ])
-    # Now wait for it to finish initializing
-    start = time.time()
-    while True:
-        try:
-            r = requests.get(PHANTOMJS_URL)
-            if r.status_code == 200:
-                break
-        except:
-            if time.time() > start + PHANTOMJS_TIMEOUT:
-                raise requests.exceptions.Timeout()
-
-
-def stop_phantomjs():
-    """ Stop PhantomJS if it's running """
-    if not phantomjs:
-        return
-    phantomjs.terminate()
-    phantomjs = None
+def qualified_class_name(cls):
+    module = cls.__module__
+    if module:
+        return '%s.%s' % (module, cls.__name__)
+    else:
+        return cls.__name__
 
 
 class QUnitTestCase(LiveServerTestCase):
     """
-    A test case which processes the result of a single QUnit test in the
-    specifed JavaScript file.  Executes the file and caches the results if this
-    is the first test from it, otherwise pulls the result from the already
-    executed run.
+    A test case which runs the QUnit tests in the specified JavaScript files.
+    Executes a whole file when the first test case in it is run and caches the
+    results for the other test cases in it.  Each QUnit test case
+    should have a module name + test name combination that is unique within
+    that test file, otherwise the results from different tests will be
+    confused.  Does not yet support running a single test or only the tests in
+    a particular module, although QUnit supports this.
+
+    Entries in test_files and dependencies should be relative to STATIC_ROOT,
+    entries in html_fixtures are looked up as templates.
     """
+    phantomjs = None
 
-    executed_tests = {}
-
-    def __init__(self, test_file, test_name, dependencies=(), html_fixtures=(),
-                 module=None):
-        self.test_file = test_file
-        self.test_name = test_name
-        self.dependencies = dependencies
-        self.html_fixtures = html_fixtures
-        self.module = module
+    test_files = ()
+    dependencies = ()
+    html_fixtures = ()
 
     @classmethod
     def setUpClass(cls):
-        super(LiveServerTestCase, cls).setUpClass()
-        start_phantomjs()
+        if hasattr(cls, 'results'):
+            # Don't initialize twice (generator and tests)
+            return
+        super(QUnitTestCase, cls).setUpClass()
+        registry[qualified_class_name(cls)] = cls
+        cls.results = {}
 
-    @classmethod
-    def tearDownClass(cls):
-        super(LiveServerTestCase, cls).tearDownClass()
-        stop_phantomjs()
+    def __init__(self, methodName='runTest'):
+        """
+        Allow the class to be instantiated without a specified test method so
+        the generator function can be run by the nose plugin.
+        """
+        if methodName == 'runTest':
+            super(QUnitTestCase, self).__init__('generator')
+        else:
+            super(QUnitTestCase, self).__init__(methodName)
 
-    def runTest(self):
-        if not self.test_file in self.executed_tests.keys():
-            path = os.path.abspath(self.test_file)
-            params = {'file': path, 'test': self.test_name}
-            if self.module:
-                params['module'] = self.module
-            self.wait_for_phantomjs()
-            r = requests.get(PHANTOMJS_URL + '/test', params=params)
-            self.executed_tests[self.test_file] = r.json()
+    def _case_url(self, test_file):
+        """
+        Get the live test server URL for a specific QUnit test file.
+        """
+        address = self.live_server_url
+        className = urllib.quote(qualified_class_name(self.__class__), safe='')
+        fileName = urllib.quote(test_file, safe='')
+        url = reverse('django-qunit-ci-test')
+        return '%s%s?class=%s&file=%s' % (address, url, className, fileName)
 
-    def wait_for_phantomjs(self):
-        """ Wait for PhantomJS to finish initializing, if necessary """
-        start = time.time()
-        while True:
-            try:
-                r = requests.get(PHANTOMJS_URL)
-                if r.status_code == 200:
-                    break
-            except:
-                if time.time() > start + PHANTOMJS_TIMEOUT:
-                    raise requests.exceptions.Timeout()
+    def generator(self):
+        """
+        Load each file in PhantomJS without actually running the tests in order
+        to generate a list of all the test cases.  qunit_case() will be called
+        for each test case in the list.
+        """
+        # Need to start the server manually since we aren't running tests yet
+        self.setUpClass()
+        for test_file in self.test_files:
+            url = self._case_url(test_file)
+            post_data = json.dumps({'action': 'list', 'url': url})
+            r = requests.post(PHANTOMJS_URL, data=post_data)
+            r.raise_for_status()
+            modules = r.json()
+            for module_name in modules:
+                for test_name in modules[module_name]:
+                    yield self.qunit_case, test_file, module_name, test_name
 
-
-class QUnitTestSuite(TestSuite):
-    """
-    A test suite representing all the individual tests in a JavaScript file of
-    QUnit tests.  QUnit doesn't provide an actual introspection mechanism for
-    modules and tests, so we have to rely on regular expressions; this could
-    break down in the case of commented-out tests, we'll try to treat those as
-    skipped tests.  If a module name is specified, only tests in that module
-    will be run.  (Again, QUnit doesn't allow finer-grained control like
-    running a single test.)
-    """
-
-    def __init__(self, test_file, module=None, dependencies=(), fixtures=()):
-        start_phantomjs()
-        r = requests.post(PHANTOMJS_URL, data={'action': 'list'})
-        modules = r.json()
-        for module in modules:
-            for test in module['tests']:
-                self.addTest(QUnitTestCase(test_file, test, dependencies,
-                                           fixtures, module['name']))
+    def qunit_case(self, test_file, module_name, test_name):
+        """
+        Run the tests in the file if that hasn't been done yet, then get the
+        result for the specific test case described.
+        """
+        if not test_file in self.results:
+            url = self._case_url(test_file)
+            params = {'action': 'test', 'url': url}
+            post_data = json.dumps(params)
+            r = requests.post(PHANTOMJS_URL, data=post_data)
+            if r.status_code != 200:
+                raise self.failureException('PhantomJS error: %s' % r.text)
+            self.results[test_file] = r.json()
+        module = self.results[test_file]['modules'][module_name]
+        test = module['tests'][test_name]
+        if not test['passed']:
+            message = ', '.join(test['failedAssertions'])
+            raise self.failureException(message)

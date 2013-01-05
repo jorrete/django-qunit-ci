@@ -16,3 +16,4 @@ egg-cache
 storage
 .project
 .pydevproject
+.tox
