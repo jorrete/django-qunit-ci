@@ -4,5 +4,5 @@ from django.conf.urls.defaults import patterns
 # the view always returns a 404 if the test classes haven't been loaded
 
 urlpatterns = patterns('django_qunit_ci.views',
-   (r'^django_qunit_ci/$', 'run_qunit_tests', {}, 'django-qunit-ci-test')
+    (r'^django_qunit_ci_test/$', 'run_qunit_tests', {}, 'django-qunit-ci-test')
 )

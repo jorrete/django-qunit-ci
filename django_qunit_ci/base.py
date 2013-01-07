@@ -1,9 +1,11 @@
 import json
+import logging
 import requests
 import urllib
 
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
+from django.test.testcases import QuietWSGIRequestHandler
 
 from django_qunit_ci.conf import settings
 
@@ -11,6 +13,47 @@ PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 PHANTOMJS_TIMEOUT = 10
 
 registry = {}
+
+# Silence "Starting new HTTP connection" messages
+logging.getLogger('requests').setLevel(logging.WARNING)
+
+
+def replacement_get_stderr(self):
+    """ Replacement for QuietWSGIRequestHandler.get_stderr() to log errors to
+    file rather than cluttering the test output """
+    return open(settings.QUNIT_LOG_FILE, "a")
+
+
+def replacement_log_message(self, format_string, *args):
+    """ Replacement for QuietWSGIRequestHandler.log_message() to log to file
+    rather than ignore the messages """
+    # Don't bother logging requests for admin images or the favicon.
+    if (self.path.startswith(self.admin_media_prefix)
+            or self.path == '/favicon.ico'):
+        return
+
+    msg = "[%s] %s\n" % (self.log_date_time_string(), format_string % args)
+
+    # Utilize terminal colors, if available
+    if args[1][0] == '2':
+        # Put 2XX first, since it should be the common case
+        msg = self.style.HTTP_SUCCESS(msg)
+    elif args[1][0] == '1':
+        msg = self.style.HTTP_INFO(msg)
+    elif args[1] == '304':
+        msg = self.style.HTTP_NOT_MODIFIED(msg)
+    elif args[1][0] == '3':
+        msg = self.style.HTTP_REDIRECT(msg)
+    elif args[1] == '404':
+        msg = self.style.HTTP_NOT_FOUND(msg)
+    elif args[1][0] == '4':
+        msg = self.style.HTTP_BAD_REQUEST(msg)
+    else:
+        # Any 5XX, or any other response
+        msg = self.style.HTTP_SERVER_ERROR(msg)
+
+    with open(settings.QUNIT_LOG_FILE, "a") as out:
+        out.write(msg)
 
 
 def qualified_class_name(cls):
@@ -45,6 +88,9 @@ class QUnitTestCase(LiveServerTestCase):
         if hasattr(cls, 'results'):
             # Don't initialize twice (generator and tests)
             return
+        if settings.QUNIT_LOG_FILE:
+            QuietWSGIRequestHandler.get_stderr = replacement_get_stderr
+            QuietWSGIRequestHandler.log_message = replacement_log_message
         super(QUnitTestCase, cls).setUpClass()
         registry[qualified_class_name(cls)] = cls
         cls.results = {}
@@ -102,6 +148,6 @@ class QUnitTestCase(LiveServerTestCase):
             self.results[test_file] = r.json()
         module = self.results[test_file]['modules'][module_name]
         test = module['tests'][test_name]
-        if not test['passed']:
+        if test['failed'] > 0:
             message = ', '.join(test['failedAssertions'])
             raise self.failureException(message)

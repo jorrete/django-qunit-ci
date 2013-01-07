@@ -4,6 +4,10 @@ from django.conf import settings as django_settings
 class LazySettings(object):
 
     @property
+    def QUNIT_LOG_FILE(self):
+        return getattr(django_settings, "QUNIT_LOG_FILE", "")
+
+    @property
     def QUNIT_PHANTOMJS_PATH(self):
         return getattr(django_settings, "QUNIT_PHANTOMJS_PATH", "phantomjs")
 
@@ -13,6 +17,6 @@ class LazySettings(object):
 
     @property
     def QUNIT_SCREENSHOT_DIR(self):
-        return getattr(django_settings, "QUNIT_SCREENSHOT_DIR", '')
+        return getattr(django_settings, "QUNIT_SCREENSHOT_DIR", "")
 
 settings = LazySettings()
