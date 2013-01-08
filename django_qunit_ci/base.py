@@ -24,7 +24,13 @@ def replacement_log_message(self, format_string, *args):
     """ Replacement for QuietWSGIRequestHandler.log_message() to log to file
     rather than ignore the messages """
     # Don't bother logging requests for admin images or the favicon.
-    if (self.path.startswith(self.admin_media_prefix)
+    if hasattr(self, 'admin_media_prefix'):
+        # Django 1.4.x
+        admin_prefix = self.admin_media_prefix
+    else:
+        # Django 1.5+
+        admin_prefix = self.admin_static_prefix
+    if (self.path.startswith(admin_prefix)
             or self.path == '/favicon.ico'):
         return
 
