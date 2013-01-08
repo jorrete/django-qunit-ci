@@ -1,5 +1,4 @@
 import json
-import logging
 import requests
 import urllib
 
@@ -13,9 +12,6 @@ PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 PHANTOMJS_TIMEOUT = 10
 
 registry = {}
-
-# Silence "Starting new HTTP connection" messages
-logging.getLogger('requests').setLevel(logging.WARNING)
 
 
 def replacement_get_stderr(self):
@@ -74,7 +70,7 @@ class QUnitTestCase(LiveServerTestCase):
     confused.  Does not yet support running a single test or only the tests in
     a particular module, although QUnit supports this.
 
-    Entries in test_files and dependencies should be relative to STATIC_ROOT,
+    Entries in test_files and dependencies should be relative to STATIC_URL,
     entries in html_fixtures are looked up as templates.
     """
     phantomjs = None

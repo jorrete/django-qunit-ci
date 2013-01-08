@@ -22,12 +22,15 @@ tests have been initialized as part of a test run.
 3.  Install PhantomJS (http://phantomjs.org/), a headless web browser used to
 run the tests.  Either make sure the "phantomjs" executable is in your PATH or
 set the QUNIT_PHANTOMJS_PATH Django setting to be the full path to it.
-4.  If you want screenshots taken when tests fail, set QUNIT_SCREENSHOT_DIR to
+4.  Make sure MEDIA_URL is set to some non-empty string, like "/media/".  If
+this is not done, the live test server can occasionally get confused and treat
+requests for a test page as requests for static files.
+5.  If you want screenshots taken when tests fail, set QUNIT_SCREENSHOT_DIR to
 the directory you want them to be saved in.
-5.  By default, PhantomJS listens for instructions from the nose test runner on
+6.  By default, PhantomJS listens for instructions from the nose test runner on
 port 9081.  If you wish to use a different port, set QUNIT_PHANTOMJS_PORT to
 the desired port number.
-6.  By default, messages from the test server are silently ignored.  If you
+7.  By default, messages from the test server are silently ignored.  If you
 want to preserve them to aid in debugging, set QUNIT_LOG_FILE to the path of
 the log file to be used.
 
