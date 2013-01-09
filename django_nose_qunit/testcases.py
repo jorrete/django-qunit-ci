@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from django.test.testcases import QuietWSGIRequestHandler, StoppableWSGIServer
 
-from django_qunit_ci.conf import settings
+from django_nose_qunit.conf import settings
 
 PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 PHANTOMJS_TIMEOUT = 10
@@ -128,7 +128,7 @@ class QUnitTestCase(LiveServerTestCase):
         address = self.live_server_url
         className = urllib.quote(qualified_class_name(self.__class__), safe='')
         fileName = urllib.quote(test_file, safe='')
-        url = reverse('django-qunit-ci-test')
+        url = reverse('django-nose-qunit-test')
         return '%s%s?class=%s&file=%s' % (address, url, className, fileName)
 
     def generator(self):

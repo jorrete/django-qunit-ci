@@ -3,7 +3,7 @@ import urllib
 from django.http import Http404
 from django.shortcuts import render
 
-from django_qunit_ci.testcases import registry
+from django_nose_qunit.testcases import registry
 
 
 def run_qunit_tests(request):
@@ -26,4 +26,4 @@ def run_qunit_tests(request):
         'dependencies': cls.dependencies,
         'fixtures': cls.html_fixtures
     }
-    return render(request, 'qunit/template.html', context)
+    return render(request, 'django_nose_qunit/template.html', context)

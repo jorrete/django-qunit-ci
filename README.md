@@ -1,36 +1,44 @@
-django-qunit-ci
-===============
+django-nose-qunit
+=================
 
 Integrate QUnit JavaScript tests into a Django test suite via nose.
 
 Installation
 ------------
 
-1.  Checkout the latest django-qunit-ci release and copy or symlink the
-`django_qunit_ci` directory into your `PYTHONPATH`.
-2.  Add `'django_qunit_ci'` to your `INSTALLED_APPS` setting.
-3.  Add some entries to your URL configuration:
+1.  Checkout the latest django-nose-qunit release and copy or symlink the
+`django_nose_qunit` directory into your `PYTHONPATH`.
+2.  Add `'django_nose_qunit'` to your `INSTALLED_APPS` setting.
+3.  Ensure that you're using nose as your test runner:
+`TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'`
+4.  Enable the nose plugin by adding it to the NOSE_PLUGINS setting:
 ```python
-from django_qunit_ci.urls import urlpatterns as qunit_urlpatterns
+NOSE_PLUGINS = [
+    'django_nose_qunit.QUnitPlugin'
+]
+```
+5.  Add an entry to your URL configuration:
+```python
+from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
 
 # ... the rest of your URLconf here ...
 
 urlpatterns += qunit_urlpatterns()
 ```
-This only adds one URL (/django_qunit_ci/), and it returns a 404 unless QUnit
-tests have been initialized as part of a test run.
-3.  Install PhantomJS (http://phantomjs.org/), a headless web browser used to
+This only adds one URL (/django_nose_qunit_test/), and it returns a 404 unless
+QUnit tests have been initialized as part of a test run.
+6.  Install PhantomJS (http://phantomjs.org/), a headless web browser used to
 run the tests.  Either make sure the "phantomjs" executable is in your PATH or
 set the QUNIT_PHANTOMJS_PATH Django setting to be the full path to it.
-4.  Make sure MEDIA_URL is set to some non-empty string, like "/media/".  If
+7.  Make sure MEDIA_URL is set to some non-empty string, like "/media/".  If
 this is not done, the live test server can occasionally get confused and treat
 requests for a test page as requests for static files.
-5.  If you want screenshots taken when tests fail, set QUNIT_SCREENSHOT_DIR to
+8.  If you want screenshots taken when tests fail, set QUNIT_SCREENSHOT_DIR to
 the directory you want them to be saved in.
-6.  By default, PhantomJS listens for instructions from the nose test runner on
+9.  By default, PhantomJS listens for instructions from the nose test runner on
 port 9081.  If you wish to use a different port, set QUNIT_PHANTOMJS_PORT to
 the desired port number.
-7.  Console output from PhantomJS is silently ignored by default.  If you wish
+10.  Console output from PhantomJS is silently ignored by default.  If you wish
 to preserve it, set QUNIT_PHANTOMJS_LOG to the path of a file to log the
 console output to.
 
@@ -49,7 +57,7 @@ finished initializing, even if this happens after the page finishes loading due
 to usage of an AMD loader like RequireJS.
 
 To make nose aware of your QUnit tests, create a subclass of
-django_qunit_ci.QUnitTestCase in a file which would normally be searched by
+django_nose_qunit.QUnitTestCase in a file which would normally be searched by
 nose, for example my_app/test/qunit/test_case.py.  It can contain as little as
 just the "test_files" attribute (a list or tuple of one or more paths to QUnit
 test scripts).  Any script dependencies for your test script(s) should be given
@@ -69,7 +77,7 @@ How It Works
 ------------
 QUnitTestCase is a subclass of Django's LiveServerTestCase, which starts a
 Django test server in the background on setup of the test class and stops it on
-teardown.  django_qunit_ci includes a nose plugin which starts PhantomJS via
+teardown.  django_nose_qunit includes a nose plugin which starts PhantomJS via
 a script which orders it to listen to further instructions via HTTP on a
 specific port.  When nose searches for tests to run, the plugin tells it how
 to ask PhantomJS to load each test script (without running the tests) in order

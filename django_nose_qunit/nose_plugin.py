@@ -10,8 +10,8 @@ from nose.failure import Failure
 from nose.plugins import Plugin
 from nose.util import test_address
 
-from django_qunit_ci import QUnitTestCase
-from django_qunit_ci.conf import settings
+from django_nose_qunit.testcases import QUnitTestCase
+from django_nose_qunit.conf import settings
 
 PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 log = logging.getLogger('nose.plugins.django_nose_qunit')
@@ -41,9 +41,9 @@ class QUnitMethodTestCase(MethodTestCase):
 class QUnitPlugin(Plugin):
     """
     Nose plugin which allows for test generator methods in subclasses of
-    django_qunit_ci.QUnitTestCase.  (Nose normally allows this for most classes
-    except subclasses of unittest.TestCase, but we need to subclass Django's
-    LiveServerTestCase which inherits from that.)
+    django_nose_qunit.QUnitTestCase.  (Nose normally allows this for most
+    classes except subclasses of unittest.TestCase, but we need to subclass
+    Django's LiveServerTestCase which inherits from that.)
     """
 
     name = 'django-qunit'

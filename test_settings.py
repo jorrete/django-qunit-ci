@@ -1,12 +1,13 @@
-# Django settings for django_qunit_ci tests
+# Django settings for django_nose_qunit tests
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
-    'django_qunit_ci.nose_plugin.QUnitPlugin'
+    'django_nose_qunit.QUnitPlugin'
 ]
+QUNIT_PHANTOMJS_LOG = 'phantomjs.log'
 QUNIT_SCREENSHOT_DIR = '.'
 
 ADMINS = (
@@ -99,10 +100,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'django_qunit_ci.urls'
+ROOT_URLCONF = 'django_nose_qunit.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-#WSGI_APPLICATION = 'django_qunit_ci.wsgi.application'
+#WSGI_APPLICATION = 'django_nose_qunit.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -118,7 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_nose',
-    'django_qunit_ci',
+    'django_nose_qunit',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
