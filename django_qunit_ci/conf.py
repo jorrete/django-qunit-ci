@@ -4,8 +4,8 @@ from django.conf import settings as django_settings
 class LazySettings(object):
 
     @property
-    def QUNIT_LOG_FILE(self):
-        return getattr(django_settings, "QUNIT_LOG_FILE", "")
+    def QUNIT_PHANTOMJS_LOG(self):
+        return getattr(django_settings, "QUNIT_PHANTOMJS_LOG", "")
 
     @property
     def QUNIT_PHANTOMJS_PATH(self):

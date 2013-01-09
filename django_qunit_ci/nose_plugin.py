@@ -82,16 +82,17 @@ class QUnitPlugin(Plugin):
         return None
 
     def begin(self):
-        """ Start PhantomJS and clear the log file (if there is one)"""
-        if settings.QUNIT_LOG_FILE:
-            with open(settings.QUNIT_LOG_FILE, 'w') as f:
-                f.write('')
+        """ Start PhantomJS and clear the log file (if there is one) """
+        if settings.QUNIT_PHANTOMJS_LOG:
+            self.log_file = open(settings.QUNIT_PHANTOMJS_LOG, 'w')
+        else:
+            self.log_file = open(os.devnull, 'w')
         self.phantomjs = Popen([
             settings.QUNIT_PHANTOMJS_PATH,
             os.path.join(os.path.dirname(__file__), 'run-qunit.js'),
             str(settings.QUNIT_PHANTOMJS_PORT),
             settings.QUNIT_SCREENSHOT_DIR
-        ])
+        ], stdout=self.log_file)
         # Now wait for it to finish initializing
         start = time.time()
         while True:
@@ -106,4 +107,5 @@ class QUnitPlugin(Plugin):
     def finalize(self, result):
         """ Stop PhantomJS """
         self.phantomjs.terminate()
+        self.log_file.close()
         return None

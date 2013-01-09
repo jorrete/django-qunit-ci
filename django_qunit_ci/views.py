@@ -3,7 +3,7 @@ import urllib
 from django.http import Http404
 from django.shortcuts import render
 
-from django_qunit_ci.base import registry
+from django_qunit_ci.testcases import registry
 
 
 def run_qunit_tests(request):

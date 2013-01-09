@@ -30,9 +30,9 @@ the directory you want them to be saved in.
 6.  By default, PhantomJS listens for instructions from the nose test runner on
 port 9081.  If you wish to use a different port, set QUNIT_PHANTOMJS_PORT to
 the desired port number.
-7.  By default, messages from the test server are silently ignored.  If you
-want to preserve them to aid in debugging, set QUNIT_LOG_FILE to the path of
-the log file to be used.
+7.  Console output from PhantomJS is silently ignored by default.  If you wish
+to preserve it, set QUNIT_PHANTOMJS_LOG to the path of a file to log the
+console output to.
 
 Creating Unit Tests
 -------------------
@@ -43,7 +43,10 @@ JavaScript file, not the HTML page that will load it (that is provided by the
 template at qunit/template.html).  If your tests depend on HTML fixtures in the
 qunit-fixture div, create those as HTML fragments in files which can be loaded
 as templates.  External script dependencies should be files in the staticfiles
-load path.
+load path.  At the end of your test definitions, you should add
+"QUnit.Django.ready = true;"; this allows PhantomJS to know that they have
+finished initializing, even if this happens after the page finishes loading due
+to usage of an AMD loader like RequireJS.
 
 To make nose aware of your QUnit tests, create a subclass of
 django_qunit_ci.QUnitTestCase in a file which would normally be searched by

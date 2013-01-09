@@ -1,26 +1,42 @@
 import json
+import logging
+import os
 import requests
 import urllib
 
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
-from django.test.testcases import QuietWSGIRequestHandler
+from django.test.testcases import QuietWSGIRequestHandler, StoppableWSGIServer
 
 from django_qunit_ci.conf import settings
 
 PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 PHANTOMJS_TIMEOUT = 10
 
+logger = logging.getLogger('django.request')
 registry = {}
 
+# First, we need to make some improvements to Django's LiveServerTestCase and
+# the associated code:
+#   1. Log messages from the WSGI request handler instead of ignoring them (the
+#      logger output can be tweaked or suppressed as necessary).
+#   2. Log errors from the WSGI request handler instead of dumping them to
+#      stderr (where they get mixed in with the test results).
+#   3. Don't dump "[Errno 32] Broken pipe" and similar harmless errors from
+#      the WSGI server to the console.
+# I'll try to get some code accepted into Django which does this automatically
+# and/or makes it easier to override.
 
-def replacement_get_stderr(self):
-    """ Replacement for QuietWSGIRequestHandler.get_stderr() to log errors to
-    file rather than cluttering the test output """
-    return open(settings.QUNIT_LOG_FILE, "a")
+
+def qwrh_log_exception(self, exc_info):
+    """Implementation of log_exception() for QuietWSGIRequestHandler which logs
+    errors instead of dumping them to stderr (where they get mixed up with the
+    test output).
+    """
+    logger.error('QuietWSGIRequestHandler exception:', exc_info=exc_info)
 
 
-def replacement_log_message(self, format_string, *args):
+def qwrh_log_message(self, format_string, *args):
     """ Replacement for QuietWSGIRequestHandler.log_message() to log to file
     rather than ignore the messages """
     # Don't bother logging requests for admin images or the favicon.
@@ -30,32 +46,33 @@ def replacement_log_message(self, format_string, *args):
     else:
         # Django 1.5+
         admin_prefix = self.admin_static_prefix
-    if (self.path.startswith(admin_prefix)
-            or self.path == '/favicon.ico'):
+    if (self.path.startswith(admin_prefix) or self.path == '/favicon.ico'):
         return
+    logger.info(format_string % args)
 
-    msg = "[%s] %s\n" % (self.log_date_time_string(), format_string % args)
 
-    # Utilize terminal colors, if available
-    if args[1][0] == '2':
-        # Put 2XX first, since it should be the common case
-        msg = self.style.HTTP_SUCCESS(msg)
-    elif args[1][0] == '1':
-        msg = self.style.HTTP_INFO(msg)
-    elif args[1] == '304':
-        msg = self.style.HTTP_NOT_MODIFIED(msg)
-    elif args[1][0] == '3':
-        msg = self.style.HTTP_REDIRECT(msg)
-    elif args[1] == '404':
-        msg = self.style.HTTP_NOT_FOUND(msg)
-    elif args[1][0] == '4':
-        msg = self.style.HTTP_BAD_REQUEST(msg)
-    else:
-        # Any 5XX, or any other response
-        msg = self.style.HTTP_SERVER_ERROR(msg)
+def qwrh_get_stderr(self):
+    """ Anything other than an actual exception trying to write to stderr
+    is probably a captured broken pipe exception or such that can be safely
+    ignored. """
+    return open(os.devnull, 'w')
 
-    with open(settings.QUNIT_LOG_FILE, "a") as out:
-        out.write(msg)
+QuietWSGIRequestHandler.log_exception = qwrh_log_exception
+QuietWSGIRequestHandler.log_message = qwrh_log_message
+QuietWSGIRequestHandler.get_stderr = qwrh_get_stderr
+
+
+def sws_handle_error(self, request, client_address):
+    """ Errors from the WSGI server itself tend to be harmless ones like
+    "[Errno 32] Broken pipe" (which happens when a browser cancels a request
+    before it finishes because it realizes it already has the asset).  By
+    default these get dumped to stderr where they get confused with the test
+    results, but aren't actually treated as test errors.  We'll just ignore
+    them for now.
+    """
+    pass
+
+StoppableWSGIServer.handle_error = sws_handle_error
 
 
 def qualified_class_name(cls):
@@ -90,9 +107,6 @@ class QUnitTestCase(LiveServerTestCase):
         if hasattr(cls, 'results'):
             # Don't initialize twice (generator and tests)
             return
-        if settings.QUNIT_LOG_FILE:
-            QuietWSGIRequestHandler.get_stderr = replacement_get_stderr
-            QuietWSGIRequestHandler.log_message = replacement_log_message
         super(QUnitTestCase, cls).setUpClass()
         registry[qualified_class_name(cls)] = cls
         cls.results = {}

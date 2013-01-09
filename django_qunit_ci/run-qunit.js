@@ -35,7 +35,7 @@ function createPage() {
   return page;
 }
 
-function waitFor(testFx, onReady, timeOutMillis) {
+function waitFor(testFx, onReady, onTimeOut, timeOutMillis) {
   var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 5001, //< Default Max Timout is 5s
     start = new Date().getTime(),
     condition = false,
@@ -49,6 +49,9 @@ function waitFor(testFx, onReady, timeOutMillis) {
           // If condition still not fulfilled (timeout but condition is 'false')
           console.log("'waitFor()' timeout");
           clearInterval(interval);
+          if (onTimeOut) {
+            typeof(onTimeOut) === "string" ? eval(onTimeOut) : onTimeOut();
+          }
         } 
         else {
           // Condition fulfilled (timeout and/or condition is 'true')
@@ -65,19 +68,33 @@ function listTests(url, response) {
       responseText = '';
   page.open(url, function (status) {
     if (status === 'success') {
-      responseText = page.evaluate(function () {
-        try {
-          return JSON.stringify(QUnit.Django.modules);
-        }
-        catch (e) {
-          return '';
-        }
-      });
+      waitFor(function () {
+        return page.evaluate(function () {
+          return QUnit.Django.ready;
+        });
+      },
+      function () {
+        responseText = page.evaluate(function () {
+          try {
+            return JSON.stringify(QUnit.Django.modules);
+          }
+          catch (e) {
+            return '';
+          }
+        });
+        page.close();
+        response.statusCode = responseText ? 200 : 500;
+        response.write(responseText);
+        response.close();
+      },
+      function () {
+        console.log('Test initialization timeout; did you remember to set QUnit.Django.ready = true at the end of your test definitions?');
+        response.statusCode = 500;
+        response.write('Test initialization timeout');
+        response.close();
+      },
+      10001);
     }
-    page.close();
-    response.statusCode = responseText ? 200 : 500;
-    response.write(responseText);
-    response.close();
   });
 }
 
@@ -93,7 +110,7 @@ function runTests(url, response) {
       // Wait for the tests to finish
       waitFor(function () {
         return page.evaluate(function () {
-          return window.QUnit.Django && window.QUnit.Django.done;
+          return QUnit.Django && QUnit.Django.done;
         });
       }, function () {
         responseText = page.evaluate(function () {

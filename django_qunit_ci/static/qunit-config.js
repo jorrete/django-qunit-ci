@@ -1,11 +1,14 @@
 /*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, regexp: true, nomen: false, onevar: false, undef: true, plusplus: false, white: true, indent: 2 */
-/*global console QUnit */
+/*global console module QUnit test */
 
 QUnit.Django = {
   done: false,
   failedAssertions: [],
   moduleName: '',
   modules: {},
+  original_module: module,
+  original_test: test,
+  ready: false,
   results: {modules: {}},
   screenshot_number: 1,
   testCases: {}
@@ -20,14 +23,10 @@ QUnit.config.autostart = false;
 // Hack the module and test definition functions so we can get information
 // about the test queue before it's started.  Note that we'll be including
 // even tests which won't be run due to a URL filter, if any.
-QUnit.Django.original_module = module;
-
 module = function (name, testEnvironment) {
   QUnit.Django.moduleName = name;
   return QUnit.Django.original_module.apply(QUnit, arguments);
 };
-
-QUnit.Django.original_test = test;
 
 test = function (testName, expected, callback, async) {
   if (!(QUnit.Django.moduleName in QUnit.Django.modules)) {

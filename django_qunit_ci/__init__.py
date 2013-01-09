@@ -1,1 +1,1 @@
-from base import QUnitTestCase
+from testcases import QUnitTestCase

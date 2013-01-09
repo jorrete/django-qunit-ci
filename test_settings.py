@@ -7,7 +7,6 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
     'django_qunit_ci.nose_plugin.QUnitPlugin'
 ]
-QUNIT_LOG_FILE = 'qunit.log'
 QUNIT_SCREENSHOT_DIR = '.'
 
 ADMINS = (
