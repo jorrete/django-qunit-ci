@@ -1,5 +1,7 @@
+import importlib
 import urllib
 
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
 
@@ -14,9 +16,14 @@ def run_qunit_tests(request):
     happen if somebody is trying to guess URLs.
     """
     test_class_name = urllib.unquote(request.GET.get('class', ''))
-    if not test_class_name in registry:
+    if not settings.DEBUG and not test_class_name in registry:
         raise Http404('No such QUnit test case: ' + test_class_name)
-    cls = registry[test_class_name]
+    if test_class_name in registry:
+        cls = registry[test_class_name]
+    else:
+        parts = test_class_name.rsplit('.', 1)
+        module = importlib.import_module(parts[0])
+        cls = getattr(module, parts[1])
     test_file = cls.test_file
     context = {
         'test_file': test_file,

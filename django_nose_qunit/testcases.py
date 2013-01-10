@@ -162,8 +162,18 @@ class QUnitTestCase(LiveServerTestCase):
             if r.status_code != 200:
                 raise self.failureException('PhantomJS error: %s' % r.text)
             self.__class__.results = r.json()
-        module = self.results['modules'][module_name]
-        test = module['tests'][test_name]
+        modules = self.results['modules']
+        if not module_name in modules:
+            msg = 'Unable to find results for module "%s".  All results: %s'
+            msg = msg % (module_name, json.dumps(self.results))
+            raise self.failureException(msg)
+        tests = modules[module_name]['tests']
+        if not test_name in tests:
+            msg = 'Unable to find results for test "%s" in module "%s". '
+            msg += 'Results for that module: %s'
+            msg = msg % (test_name, module_name, json.dumps(self.results))
+            raise self.failureException(msg)
+        test = tests[test_name]
         if test['failed'] > 0:
             message = ', '.join(test['failedAssertions'])
             raise self.failureException(message)

@@ -14,8 +14,6 @@ QUnit.Django = {
   testCases: {}
 };
 
-console.error = console.warn = function () {};
-
 // Let us parse the test names from the page without running them; we'll start
 // the tests manually when appropriate
 QUnit.config.autostart = false;
@@ -46,6 +44,10 @@ QUnit.moduleStart(function (context) {
   var name = context.name,
       qd = QUnit.Django,
       modules = qd.results.modules;
+  if (!name) {
+    // Dummy module for a test that isn't contained in one
+    name = '';
+  }
   qd.moduleName = name;
   if (!(name in modules)) {
     modules[name] = {
@@ -73,18 +75,6 @@ QUnit.testStart(function (context) {
       modules = qd.results.modules;
   qd.testStart = new Date();
   qd.failedAssertions = [];
-  // Is the test not contained in a module?
-  if (!(qd.moduleName in modules)) {
-    qd.moduleName = '';
-    qd.moduleStart = new Date();
-    modules[''] = {
-      failed: 0,
-      passed: 0,
-      total: 0,
-      tests: {},
-      time: 0
-    };
-  }
 });
 
 QUnit.testDone(function (result) {

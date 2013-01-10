@@ -23,7 +23,7 @@ from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
 urlpatterns += qunit_urlpatterns()
 ```
 This only adds one URL (/django_nose_qunit_test/), and it returns a 404 unless
-QUnit tests have been initialized as part of a test run.
+DEBUG is True or QUnit tests have been initialized as part of a test run.
 6.  Install PhantomJS (http://phantomjs.org/), a headless web browser used to
 run the tests.  Either make sure the "phantomjs" executable is in your PATH or
 set the QUNIT_PHANTOMJS_PATH Django setting to be the full path to it.
@@ -65,10 +65,18 @@ Running Unit Tests
 ------------------
 Add " --with-django-qunit" to your normal test execution command (using
 django-admin.py or manage.py).  Execution can be restricted to one or more
-specified packages and/or classes as normal.  There is currently no support for
+specified packages and/or classes as normal ("myapp", "myapp.tests.qunit",
+"myapp.tests.qunit:MyTestCase", etc.).  There is currently no support for
 running only a single module or test within a QUnit test script; QUnit module
 and test names can be arbitrary strings, which makes it difficult for the nose
-command parser to handle them.
+command line parser to handle them.
+
+To run the QUnit tests in a regular web browser, use the runserver management
+command with DEBUG set to True.  You can then access the test at a URL like
+http://localhost:8000/django_nose_qunit_test/?class=my.package.file.TestClass
+(assuming you had a subclass of QUnitTestCase named TestClass in the module
+my.package.file).  This can be useful when first developing a test script and
+when troubleshooting failing tests.
 
 How It Works
 ------------

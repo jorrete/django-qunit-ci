@@ -30,7 +30,7 @@ class QUnitMethodTestCase(MethodTestCase):
         module_name = arg[0]
         test_name = arg[1]
         if module_name:
-            self.description = '%s:%s' % (module_name, test_name)
+            self.description = '[%s] %s' % (module_name, test_name)
         else:
             self.description = test_name
 
@@ -40,10 +40,8 @@ class QUnitMethodTestCase(MethodTestCase):
 
 class QUnitPlugin(Plugin):
     """
-    Nose plugin which allows for test generator methods in subclasses of
-    django_nose_qunit.QUnitTestCase.  (Nose normally allows this for most
-    classes except subclasses of unittest.TestCase, but we need to subclass
-    Django's LiveServerTestCase which inherits from that.)
+    Nose plugin which starts PhantomJS and uses it to run QUnit JavaScript
+    tests identified by subclasses of QUnitTestCase.
     """
 
     name = 'django-qunit'
@@ -92,7 +90,7 @@ class QUnitPlugin(Plugin):
             os.path.join(os.path.dirname(__file__), 'run-qunit.js'),
             str(settings.QUNIT_PHANTOMJS_PORT),
             settings.QUNIT_SCREENSHOT_DIR
-        ], stdout=self.log_file)
+        ], stdout=self.log_file, stderr=self.log_file)
         # Now wait for it to finish initializing
         start = time.time()
         while True:
