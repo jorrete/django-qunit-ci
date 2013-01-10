@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import requests
 import sys
 import time
@@ -36,6 +37,15 @@ class QUnitMethodTestCase(MethodTestCase):
 
     def shortDescription(self):
         return self.description
+
+    def __str__(self):
+        # Periods and parentheses can confuse the xunit plugin, strip them
+        desc = re.sub(r'[\.\(\)]', '', self.description)
+        name = "%s.%s.%s" % (self.cls.__module__,
+                             self.cls.__name__,
+                             desc)
+        return name
+    __repr__ = __str__
 
 
 class QUnitPlugin(Plugin):
