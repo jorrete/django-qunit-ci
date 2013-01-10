@@ -17,8 +17,7 @@ NOSE_PLUGINS = [
     'django_nose_qunit.QUnitPlugin'
 ]
 ```
-5.  Add an entry to your URL configuration:
-```python
+5.  Add an entry to your URL configuration: ```python
 from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
 
 # ... the rest of your URLconf here ...
