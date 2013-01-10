@@ -20,9 +20,6 @@ NOSE_PLUGINS = [
 5.  Add an entry to your URL configuration:
 ```python
 from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
-
-urlpatterns = other_app_patterns
-
 urlpatterns += qunit_urlpatterns()
 ```
 This only adds one URL (/django_nose_qunit_test/), and it returns a 404 unless
