@@ -29,66 +29,80 @@ module = function (name, testEnvironment) {
 };
 
 test = function (testName, expected, callback, async) {
-  if (!(QUnit.Django.moduleName in QUnit.Django.modules)) {
-      QUnit.Django.modules[QUnit.Django.moduleName] = [];
+  var qd = QUnit.Django,
+      moduleName = qd.moduleName,
+      modules = qd.modules;
+  if (!(moduleName in modules)) {
+      modules[moduleName] = [];
   }
-  QUnit.Django.modules[QUnit.Django.moduleName].push(testName);
-  return QUnit.Django.original_test.apply(QUnit, arguments);
+  modules[moduleName].push(testName);
+  return qd.original_test.apply(QUnit, arguments);
 };
 
 // Now collect the test results as the tests are run
 
 QUnit.moduleStart(function (context) {
   // context = { name }
-  QUnit.Django.moduleStart = new Date();
-  QUnit.Django.testCases = {};
+  var name = context.name,
+      qd = QUnit.Django,
+      modules = qd.results.modules;
+  qd.moduleName = name;
+  if (!(name in modules)) {
+    modules[name] = {
+      failed: 0,
+      passed: 0,
+      total: 0,
+      tests: {},
+      time: 0
+    };
+  }
 });
 
 QUnit.moduleDone(function (context) {
   // context = { name, failed, passed, total }
-  QUnit.Django.results.modules[context.name] = {
-    failed: context.failed,
-    passed: context.passed,
-    total: context.total,
-    tests: QUnit.Django.testCases,
-    time: (new Date() - QUnit.Django.moduleStart) / 1000
-  };
+  var qd = QUnit.Django,
+      results = qd.results.modules[context.name];
+  results.failed = context.failed;
+  results.passed = context.passed;
+  results.total = context.total;
 });
 
 QUnit.testStart(function (context) {
   // context = { name, module }
-  QUnit.Django.testStart = new Date();
-  QUnit.Django.failedAssertions = [];
+  var qd = QUnit.Django,
+      modules = qd.results.modules;
+  qd.testStart = new Date();
+  qd.failedAssertions = [];
+  // Is the test not contained in a module?
+  if (!(qd.moduleName in modules)) {
+    qd.moduleName = '';
+    qd.moduleStart = new Date();
+    modules[''] = {
+      failed: 0,
+      passed: 0,
+      total: 0,
+      tests: {},
+      time: 0
+    };
+  }
 });
 
 QUnit.testDone(function (result) {
   // result = { name, failed, passed, total }
-  var module,
-      time = (new Date() - QUnit.Django.testStart) / 1000;
-  QUnit.Django.testCases[result.name] = {
+  var qd = QUnit.Django,
+      module = qd.results.modules[qd.moduleName],
+      time = (new Date() - qd.testStart) / 1000;
+  module.tests[result.name] = {
     passed: result.passed,
     failed: result.failed,
     total: result.total,
-    failedAssertions: QUnit.Django.failedAssertions,
+    failedAssertions: qd.failedAssertions,
     time: time
   };
-  if (QUnit.Django.moduleName == '') {
-    // Build a pseudo-module for tests that aren't contained in one
-    if (!('' in QUnit.Django.results.modules)) {
-      QUnit.Django.results.modules[''] = {
-        passed: 0,
-        failed: 0,
-        total: 0,
-        time: 0,
-        tests: QUnit.Django.testCases
-      }
-    }
-    module = QUnit.Django.results.modules[''];
-    module.passed += result.passed;
-    module.failed += result.failed;
-    module.total += result.total;
-    module.time += time;
-  }
+  module.passed += result.passed;
+  module.failed += result.failed;
+  module.total += result.total;
+  module.time += time;
 });
 
 QUnit.log(function (details) {
@@ -96,7 +110,8 @@ QUnit.log(function (details) {
   if (details.result) {
     return;
   }
-  var filename = "qunit_" + QUnit.Django.screenshot_number + ".png",
+  var qd = QUnit.Django,
+      filename = "qunit_" + qd.screenshot_number + ".png",
       message = details.message || "";
   if (details.expected) {
     if (message) {
@@ -104,17 +119,19 @@ QUnit.log(function (details) {
     }
     message = "expected: " + JSON.stringify(details.expected) + ", but was: " + JSON.stringify(details.actual);
   }
-  QUnit.Django.screenshot_number += 1;
+  qd.screenshot_number += 1;
   message += " (" + filename + ")";
-  QUnit.Django.failedAssertions.push(message);
+  qd.failedAssertions.push(message);
   console.log("QUnit Screenshot:" + filename);
 });
 
 QUnit.done(function (details) {
   //details = { failed, passed, total, runtime }
-  QUnit.Django.results.failed = details.failed,
-  QUnit.Django.results.passed = details.passed,
-  QUnit.Django.results.total = details.total,
-  QUnit.Django.results.time = details.runtime / 1000;
-  QUnit.Django.done = true;
+  var qd = QUnit.Django,
+      results = qd.results;
+  results.failed = details.failed,
+  results.passed = details.passed,
+  results.total = details.total,
+  results.time = details.runtime / 1000;
+  qd.done = true;
 });

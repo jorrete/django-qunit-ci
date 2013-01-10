@@ -16,7 +16,7 @@ if (screenshotDir && screenshotDir.charAt(screenshotDir.length - 1) !== separato
   screenshotDir += separator;
 }
 
-function createPage() {
+function createPage(resources) {
   var page = require('webpage').create();
   // Route "console.log()" calls from within the Page context to the main
   // Phantom context (i.e. current "this").  Also, generate screenshots when
@@ -31,6 +31,12 @@ function createPage() {
   };
   page.onError = function (msg, trace) {
     console.log(msg + ': ' + JSON.stringify(trace));
+  };
+  page.onResourceRequested = function (request) {
+    resources[request.url] = false;
+  };
+  page.onResourceReceived = function (response) {
+    resources[response.url] = true;
   };
   return page;
 }
@@ -64,8 +70,12 @@ function waitFor(testFx, onReady, onTimeOut, timeOutMillis) {
 
 // List the tests without actually running them.
 function listTests(url, response) {
-  var page = createPage(),
-      responseText = '';
+  var failed = [],
+      msg,
+      resources = {},
+      page = createPage(resources),
+      responseText = '',
+      resource;
   page.open(url, function (status) {
     if (status === 'success') {
       waitFor(function () {
@@ -83,23 +93,34 @@ function listTests(url, response) {
           }
         });
         page.close();
+        console.log(responseText);
         response.statusCode = responseText ? 200 : 500;
         response.write(responseText);
         response.close();
       },
       function () {
-        console.log('Test initialization timeout; did you remember to set QUnit.Django.ready = true at the end of your test definitions?');
+        msg = 'Test initialization timeout; did you remember to set ';
+        msg += 'QUnit.Django.ready = true at the end of your test definitions';
+        msg += ' (and run collectstatic if appropriate)?';
+        for (resource in resources) {
+          if (resources.hasOwnProperty(resource) && !resources[resource]) {
+            failed.push(resource);
+          }
+        }
+        if (failed.length > 0) {
+          msg += '\nResources which failed to load: ' + JSON.stringify(failed);
+        }
         response.statusCode = 500;
-        response.write('Test initialization timeout');
+        response.write(msg);
         response.close();
-      },
-      10001);
+      });
     }
   });
 }
 
 function runTests(url, response) {
-  var page = createPage();
+  var resources = {},
+      page = createPage(resources);
       responseText = '';
   page.open(url, function (status) {
     if (status === 'success') {

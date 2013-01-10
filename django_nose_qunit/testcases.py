@@ -93,23 +93,19 @@ class QUnitTestCase(LiveServerTestCase):
     confused.  Does not yet support running a single test or only the tests in
     a particular module, although QUnit supports this.
 
-    Entries in test_files and dependencies should be relative to STATIC_URL,
+    test_file and dependencies paths should be relative to STATIC_URL,
     entries in html_fixtures are looked up as templates.
     """
     phantomjs = None
 
-    test_files = ()
+    test_file = ''
     dependencies = ()
     html_fixtures = ()
 
     @classmethod
     def setUpClass(cls):
-        if hasattr(cls, 'results'):
-            # Don't initialize twice (generator and tests)
-            return
         super(QUnitTestCase, cls).setUpClass()
         registry[qualified_class_name(cls)] = cls
-        cls.results = {}
 
     def __init__(self, methodName='runTest'):
         """
@@ -121,15 +117,14 @@ class QUnitTestCase(LiveServerTestCase):
         else:
             super(QUnitTestCase, self).__init__(methodName)
 
-    def _case_url(self, test_file):
+    def _case_url(self):
         """
-        Get the live test server URL for a specific QUnit test file.
+        Get the live test server URL for this test case's QUnit test file.
         """
         address = self.live_server_url
         className = urllib.quote(qualified_class_name(self.__class__), safe='')
-        fileName = urllib.quote(test_file, safe='')
         url = reverse('django-nose-qunit-test')
-        return '%s%s?class=%s&file=%s' % (address, url, className, fileName)
+        return '%s%s?class=%s' % (address, url, className)
 
     def generator(self):
         """
@@ -137,32 +132,37 @@ class QUnitTestCase(LiveServerTestCase):
         to generate a list of all the test cases.  qunit_case() will be called
         for each test case in the list.
         """
-        # Need to start the server manually since we aren't running tests yet
-        self.setUpClass()
-        for test_file in self.test_files:
-            url = self._case_url(test_file)
+        # Need to start and stop server, since tests aren't running yet
+        self.__class__.setUpClass()
+        try:
+            url = self._case_url()
             post_data = json.dumps({'action': 'list', 'url': url})
             r = requests.post(PHANTOMJS_URL, data=post_data)
-            r.raise_for_status()
+            if r.status_code != 200:
+                className = qualified_class_name(self.__class__)
+                msg = 'PhantomJS error in %s: %s' % (className, r.text)
+                raise self.failureException(msg)
             modules = r.json()
-            for module_name in modules:
-                for test_name in modules[module_name]:
-                    yield self.qunit_case, test_file, module_name, test_name
+        finally:
+            self.__class__.tearDownClass()
+        for module_name in modules:
+            for test_name in modules[module_name]:
+                yield self.qunit_case, module_name, test_name
 
-    def qunit_case(self, test_file, module_name, test_name):
+    def qunit_case(self, module_name, test_name):
         """
         Run the tests in the file if that hasn't been done yet, then get the
         result for the specific test case described.
         """
-        if not test_file in self.results:
-            url = self._case_url(test_file)
+        if not hasattr(self.__class__, 'results'):
+            url = self._case_url()
             params = {'action': 'test', 'url': url}
             post_data = json.dumps(params)
             r = requests.post(PHANTOMJS_URL, data=post_data)
             if r.status_code != 200:
                 raise self.failureException('PhantomJS error: %s' % r.text)
-            self.results[test_file] = r.json()
-        module = self.results[test_file]['modules'][module_name]
+            self.__class__.results = r.json()
+        module = self.results['modules'][module_name]
         test = module['tests'][test_name]
         if test['failed'] > 0:
             message = ', '.join(test['failedAssertions'])

@@ -59,9 +59,9 @@ to usage of an AMD loader like RequireJS.
 To make nose aware of your QUnit tests, create a subclass of
 django_nose_qunit.QUnitTestCase in a file which would normally be searched by
 nose, for example my_app/test/qunit/test_case.py.  It can contain as little as
-just the "test_files" attribute (a list or tuple of one or more paths to QUnit
-test scripts).  Any script dependencies for your test script(s) should be given
-as paths relative to STATIC_ROOT in the "dependencies" attribute.  Paths to
+just the "test_file" attribute (a path to a QUnit test script, relative to
+STATIC_URL).  Any script dependencies for your test script should be given
+as paths relative to STATIC_URL in the "dependencies" attribute.  Paths to
 HTML fixture templates are listed in the "html_fixtures" attribute.
 
 Running Unit Tests

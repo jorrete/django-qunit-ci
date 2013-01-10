@@ -27,8 +27,8 @@ class QUnitMethodTestCase(MethodTestCase):
     def __init__(self, method, test=None, arg=tuple(), descriptor=None):
         super(QUnitMethodTestCase, self).__init__(method, test, arg,
                                                   descriptor)
-        module_name = arg[1]
-        test_name = arg[2]
+        module_name = arg[0]
+        test_name = arg[1]
         if module_name:
             self.description = '%s:%s' % (module_name, test_name)
         else:
@@ -57,7 +57,7 @@ class QUnitPlugin(Plugin):
     def loadTestsFromTestCase(self, testCaseClass):
         if not issubclass(testCaseClass, QUnitTestCase):
             return None
-        if len(testCaseClass.test_files) < 1:
+        if len(testCaseClass.test_file) < 1:
             return None
         log.debug('Loading tests from %s' % testCaseClass.__name__)
         inst = testCaseClass()
