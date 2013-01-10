@@ -29,6 +29,8 @@ def run_qunit_tests(request):
         'test_file': test_file,
         'title': '%s (%s)' % (test_class_name, test_file),
         'dependencies': cls.dependencies,
-        'fixtures': cls.html_fixtures
+        'fixtures': cls.html_fixtures,
+        # Can't assume django.core.context_processors.debug is in use
+        'autostart': settings.DEBUG,
     }
     return render(request, 'django_nose_qunit/template.html', context)
