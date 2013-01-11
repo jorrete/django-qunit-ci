@@ -75,6 +75,17 @@ QUnit.testStart(function (context) {
       modules = qd.results.modules;
   qd.testStart = new Date();
   qd.failedAssertions = [];
+  if (!(qd.moduleName in modules)) {
+    // Test file with no modules at all, so moduleStart wasn't called
+    qd.moduleName = '';
+    modules[''] = {
+      failed: 0,
+      passed: 0,
+      total: 0,
+      tests: {},
+      time: 0
+    };
+  }
 });
 
 QUnit.testDone(function (result) {

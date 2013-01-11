@@ -72,7 +72,8 @@ and test names can be arbitrary strings, which makes it difficult for the nose
 command line parser to handle them.
 
 To run the QUnit tests in a regular web browser, use the runserver management
-command with DEBUG set to True.  You can then access the test at a URL like
+command with QUNIT_DYNAMIC_REGISTRY set to True (by default, it has the same
+value as DEBUG).  You can then access the test at a URL like
 http://localhost:8000/django_nose_qunit_test/?class=my.package.file.TestClass
 (assuming you had a subclass of QUnitTestCase named TestClass in the module
 my.package.file).  This can be useful when first developing a test script and

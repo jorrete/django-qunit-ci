@@ -1,10 +1,11 @@
 import importlib
 import urllib
 
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.http import Http404
 from django.shortcuts import render
 
+from django_nose_qunit.conf import settings
 from django_nose_qunit.testcases import registry
 
 
@@ -16,7 +17,7 @@ def run_qunit_tests(request):
     happen if somebody is trying to guess URLs.
     """
     test_class_name = urllib.unquote(request.GET.get('class', ''))
-    if not settings.DEBUG and not test_class_name in registry:
+    if not settings.QUNIT_DYNAMIC_REGISTRY and not test_class_name in registry:
         raise Http404('No such QUnit test case: ' + test_class_name)
     if test_class_name in registry:
         cls = registry[test_class_name]
@@ -31,6 +32,6 @@ def run_qunit_tests(request):
         'dependencies': cls.dependencies,
         'fixtures': cls.html_fixtures,
         # Can't assume django.core.context_processors.debug is in use
-        'autostart': settings.DEBUG,
+        'autostart': django_settings.DEBUG,
     }
     return render(request, 'django_nose_qunit/template.html', context)

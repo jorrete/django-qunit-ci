@@ -93,7 +93,6 @@ function listTests(url, response) {
           }
         });
         page.close();
-        console.log(responseText);
         response.statusCode = responseText ? 200 : 500;
         response.write(responseText);
         response.close();
