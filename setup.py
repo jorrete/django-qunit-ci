@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1'
+version = '1.2'
 
 setup(
     name="django-nose-qunit",
@@ -13,7 +13,7 @@ setup(
         'django_nose_qunit': [
             'run-qunit.js',
             'static/*.css',
-            'static/*.js'
+            'static/*.js',
             'static/django_nose_qunit/test/*.js',
             'templates/django_nose_qunit/*.html',
             'templates/django_nose_qunit/fixtures/*.html',
