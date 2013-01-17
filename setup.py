@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.2'
+version = '1.3'
 
 setup(
     name="django-nose-qunit",
@@ -27,7 +27,8 @@ setup(
     ],
     entry_points={
         'nose.plugins.0.10': [
-            'django-qunit = django_nose_qunit.nose_plugin:QUnitPlugin'
+            'django-qunit = django_nose_qunit.nose_plugin:QUnitPlugin',
+            'django-qunit-index = django_nose_qunit.nose_plugin:QUnitIndexPlugin'
         ]
     },
     classifiers=[

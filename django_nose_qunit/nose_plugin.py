@@ -6,9 +6,10 @@ import sys
 import time
 from subprocess import Popen
 
-from nose.case import MethodTestCase
+from nose.case import MethodTestCase, Test
 from nose.failure import Failure
 from nose.plugins import Plugin
+from nose.plugins.collect import TestSuiteFactory
 from nose.util import test_address
 
 from django_nose_qunit.testcases import QUnitTestCase
@@ -46,6 +47,59 @@ class QUnitMethodTestCase(MethodTestCase):
                              desc)
         return name
     __repr__ = __str__
+
+
+class QUnitIndexPlugin(Plugin):
+    """
+    Nose plugin which just finds QUnit test cases without actually running
+    them.  Used by the view at '/qunit/' which lists all the
+    available QUnit test files.
+    """
+
+    name = 'django-qunit-index'
+    qunit_test_classes = []
+
+    def options(self, parser, env=os.environ):
+        super(QUnitIndexPlugin, self).options(parser, env=env)
+
+    def configure(self, options, conf):
+        super(QUnitIndexPlugin, self).configure(options, conf)
+
+    def prepareTestLoader(self, loader):
+        """Install collect-only suite class in TestLoader.
+        """
+        # Disable context awareness
+        log.debug("Preparing test loader")
+        self.__class__.qunit_test_classes = []
+        loader.suiteClass = TestSuiteFactory(self.conf)
+
+    def prepareTestCase(self, test):
+        """Replace actual test with dummy that always passes.
+        """
+        # Return something that always passes
+        log.debug("Preparing test case %s", test)
+        if not isinstance(test, Test):
+            return
+
+        def run(result):
+            # We need to make these plugin calls because there won't be
+            # a result proxy, due to using a stripped-down test suite
+            self.conf.plugins.startTest(test)
+            result.startTest(test)
+            self.conf.plugins.addSuccess(test)
+            result.addSuccess(test)
+            self.conf.plugins.stopTest(test)
+            result.stopTest(test)
+        return run
+
+    def wantClass(self, cls):
+        if issubclass(cls, QUnitTestCase) and len(cls.test_file) > 0:
+            self.qunit_test_classes.append(cls)
+            return True
+        return False
+
+    def wantFunction(self, function):
+        return False
 
 
 class QUnitPlugin(Plugin):

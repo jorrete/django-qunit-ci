@@ -14,10 +14,6 @@ QUnit.Django = {
   testCases: {}
 };
 
-// Let us parse the test names from the page without running them; we'll start
-// the tests manually when appropriate
-QUnit.config.autostart = false;
-
 // Hack the module and test definition functions so we can get information
 // about the test queue before it's started.  Note that we'll be including
 // even tests which won't be run due to a URL filter, if any.

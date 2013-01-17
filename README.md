@@ -73,11 +73,11 @@ command line parser to handle them.
 
 To run the QUnit tests in a regular web browser, use the runserver management
 command with QUNIT_DYNAMIC_REGISTRY set to True (by default, it has the same
-value as DEBUG).  You can then access the test at a URL like
-http://localhost:8000/django_nose_qunit_test/?class=my.package.file.TestClass
-(assuming you had a subclass of QUnitTestCase named TestClass in the module
-my.package.file).  This can be useful when first developing a test script and
-when troubleshooting failing tests.
+value as DEBUG).  If DEBUG is False, you'll also need to use the "--insecure"
+parameter to serve static files.  You can then access a list of links to the
+available QUnit tests at a URL like http://localhost:8000/qunit/.  This can be
+useful when first developing a test script and when troubleshooting failing
+tests.
 
 How It Works
 ------------
