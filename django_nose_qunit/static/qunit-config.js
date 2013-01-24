@@ -33,6 +33,21 @@ test = function (testName, expected, callback, async) {
   return qd.original_test.apply(QUnit, arguments);
 };
 
+// To be called before defining any tests or modules.  Intelligently calls
+// QUnit.start() or not depending on whether we're running in a browser or in
+// PhantomJS for a test run
+QUnit.Django.start = function () {
+  if (QUnit.Django.autostart) {
+    QUnit.start();
+  }
+};
+
+// To be called after defining any tests or modules.  Lets PhantomJS know that
+// they've all been defined.
+QUnit.Django.end = function () {
+  QUnit.Django.ready = true;
+};
+
 // Now collect the test results as the tests are run
 
 QUnit.moduleStart(function (context) {

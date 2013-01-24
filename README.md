@@ -48,10 +48,11 @@ JavaScript file, not the HTML page that will load it (that is provided by the
 template at qunit/template.html).  If your tests depend on HTML fixtures in the
 qunit-fixture div, create those as HTML fragments in files which can be loaded
 as templates.  External script dependencies should be files in the staticfiles
-load path.  At the end of your test definitions, you should add
-"QUnit.Django.ready = true;"; this allows PhantomJS to know that they have
-finished initializing, even if this happens after the page finishes loading due
-to usage of an AMD loader like RequireJS.
+load path.  You should add "QUnit.Django.start();" before your test definitions
+and "QUnit.Django.end();" at the end of your test definitions; this allows the
+tests to start executing at an appropriate time depending on whether they're
+running in a browser, in a nose test run, or inside a require() block of an AMD
+loader like RequireJS.
 
 To make nose aware of your QUnit tests, create a subclass of
 django_nose_qunit.QUnitTestCase in a file which would normally be searched by

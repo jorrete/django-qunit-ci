@@ -1,5 +1,7 @@
 // Example from http://qunitjs.com/intro/
 
+QUnit.Django.start();
+
 var prettyDate = {
     format: function(now, time){
         var date = new Date(time || ""),
@@ -59,4 +61,4 @@ function domtest(name, now, first, second) {
 domtest("prettyDate.update", "2008-01-28T22:25:00Z", "2 hours ago", "Yesterday");
 domtest("prettyDate.update, one day later", "2008/01/29 22:25:00", "Yesterday", "2 days ago");
 
-QUnit.Django.ready = true;
+QUnit.Django.end();

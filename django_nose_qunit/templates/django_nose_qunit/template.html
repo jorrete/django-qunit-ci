@@ -6,9 +6,12 @@
     <link rel="stylesheet" href="{% static 'qunit.css' %}" type="text/css" media="screen">  
     <script type="text/javascript" src="{% static 'qunit.js' %}"></script>     
     <script type="text/javascript" src="{% static 'qunit-config.js' %}"></script>
-    {% if not autostart %}
-    <script type="test/javascript">QUnit.config.autostart = false;</script>
-    {% endif %}
+    <script type="test/javascript">
+        QUnit.config.autostart = false;
+        {% if autostart %}
+        QUnit.Django.autostart = true;
+        {% endif %}
+    </script>
     {% for dep in dependencies %}
         <script type="text/javascript" src="{% static dep %}"></script>
     {% endfor %}
