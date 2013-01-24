@@ -1,6 +1,5 @@
 /*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, regexp: true, nomen: false, onevar: false, undef: true, plusplus: false, white: true, indent: 2 */
 /*global console module QUnit test */
-
 QUnit.Django = {
   done: false,
   failedAssertions: [],
