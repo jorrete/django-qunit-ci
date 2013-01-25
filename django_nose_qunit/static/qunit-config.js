@@ -84,7 +84,6 @@ QUnit.testStart(function (context) {
   var qd = QUnit.Django,
       moduleName = context.module ? context.module : '';
       modules = qd.results.modules;
-  qd.testStart = new Date();
   qd.failedAssertions = [];
   if (!(moduleName in modules)) {
     // Test file with no modules at all, so moduleStart wasn't called
@@ -100,22 +99,21 @@ QUnit.testStart(function (context) {
 });
 
 QUnit.testDone(function (result) {
-  // result = { name, module, failed, passed, total }
+  // result = { name, module, failed, passed, total, duration }
   var qd = QUnit.Django,
       moduleName = result.module ? result.module : '',
-      module = qd.results.modules[moduleName],
-      time = (new Date() - qd.testStart) / 1000;
+      module = qd.results.modules[moduleName];
   module.tests[result.name] = {
     passed: result.passed,
     failed: result.failed,
     total: result.total,
     failedAssertions: qd.failedAssertions,
-    time: time
+    time: result.duration
   };
   module.passed += result.passed;
   module.failed += result.failed;
   module.total += result.total;
-  module.time += time;
+  module.time += result.duration;
 });
 
 QUnit.log(function (details) {
