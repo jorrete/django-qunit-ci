@@ -1,5 +1,5 @@
 /*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, regexp: true, nomen: false, onevar: false, undef: true, plusplus: false, white: true, indent: 2 */
-/*global console module QUnit test */
+/*global console module:true QUnit test:true */
 QUnit.Django = {
   done: false,
   failedAssertions: [],
@@ -26,7 +26,7 @@ test = function (testName, expected, callback, async) {
       moduleName = qd.moduleName,
       modules = qd.modules;
   if (!(moduleName in modules)) {
-      modules[moduleName] = [];
+    modules[moduleName] = [];
   }
   modules[moduleName].push(testName);
   return qd.original_test.apply(QUnit, arguments);
@@ -82,7 +82,7 @@ QUnit.moduleDone(function (context) {
 QUnit.testStart(function (context) {
   // context = { name, module }
   var qd = QUnit.Django,
-      moduleName = context.module ? context.module : '';
+      moduleName = context.module ? context.module : '',
       modules = qd.results.modules;
   qd.failedAssertions = [];
   if (!(moduleName in modules)) {

@@ -123,9 +123,15 @@ function runTests(url, response) {
       responseText = '';
   page.open(url, function (status) {
     if (status === 'success') {
-      // Now that the page has loaded, start the tests
-      page.evaluate(function () {
-        QUnit.start();
+      // Start the tests once the page has finished loading
+      waitFor(function () {
+        return page.evaluate(function () {
+          return QUnit.Django.ready;
+        });
+      }, function () {
+        page.evaluate(function () {
+          QUnit.start();
+        });
       });
       // Wait for the tests to finish
       waitFor(function () {
