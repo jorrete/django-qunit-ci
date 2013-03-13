@@ -13,7 +13,10 @@
         {% endif %}
     </script>
     {% for dep in dependencies %}
-        <script type="text/javascript" src="{% static dep %}"></script>
+      <script type="text/javascript" src="{% static dep %}"></script>
+    {% endfor %}
+    {% for raw_script_url in raw_script_urls %}
+      <script type="text/javascript" src="{{ raw_script_url }}"></script>
     {% endfor %}
     <script type="text/javascript" src="{% static test_file %}"></script>
   </head>

@@ -38,6 +38,7 @@ def run_qunit_tests(request):
         'test_file': test_file,
         'title': '%s (%s)' % (test_class_name, test_file),
         'dependencies': cls.dependencies,
+        'raw_script_urls': cls.raw_script_urls,
         'fixtures': cls.html_fixtures,
         'html_strings': cls.html_strings,
         # Can't assume django.core.context_processors.debug is in use

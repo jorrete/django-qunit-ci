@@ -95,12 +95,14 @@ class QUnitTestCase(LiveServerTestCase):
 
     test_file and dependencies paths should be relative to STATIC_URL,
     entries in html_fixtures are looked up as templates. html_strings are
-    injected directly.
-    """
+    injected directly. raw_script_urls are referenced directly (no STATIC_URL
+    processing."""
+
     phantomjs = None
 
     test_file = ''
     dependencies = ()
+    raw_script_urls = ()
     html_fixtures = ()
     html_strings = ()
 
