@@ -94,13 +94,15 @@ class QUnitTestCase(LiveServerTestCase):
     a particular module, although QUnit supports this.
 
     test_file and dependencies paths should be relative to STATIC_URL,
-    entries in html_fixtures are looked up as templates.
+    entries in html_fixtures are looked up as templates. html_strings are
+    injected directly.
     """
     phantomjs = None
 
     test_file = ''
     dependencies = ()
     html_fixtures = ()
+    html_strings = ()
 
     @classmethod
     def setUpClass(cls):

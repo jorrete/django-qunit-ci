@@ -31,5 +31,11 @@
         {% include fixture %}
     {% endfor %}
     </div>
+    <div id="qunit-html">
+    {% for raw_html in html_strings %}
+      {{ raw_html|safe }}
+    {% endfor %}
+    </div>
+  </body>
   </body>
 </html>

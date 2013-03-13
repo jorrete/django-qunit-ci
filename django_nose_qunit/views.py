@@ -15,7 +15,7 @@ from django_nose_qunit.testcases import registry
 def run_qunit_tests(request):
     """
     Serve a page for running the specified QUnit test file, with JavaScript
-    dependencies and HTML fixtures as given in the named test class.  Returns
+    dependencies and HTML fixtures & strings as given in the named test class.  Returns
     a 404 whenever an unknown test class is requested; should only
     happen if somebody is trying to guess URLs.
     """
@@ -39,6 +39,7 @@ def run_qunit_tests(request):
         'title': '%s (%s)' % (test_class_name, test_file),
         'dependencies': cls.dependencies,
         'fixtures': cls.html_fixtures,
+        'html_strings': cls.html_strings,
         # Can't assume django.core.context_processors.debug is in use
         'autostart': autostart,
     }
