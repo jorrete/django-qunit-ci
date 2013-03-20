@@ -5,6 +5,7 @@ import os
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
     'django_nose_qunit.QUnitPlugin'
