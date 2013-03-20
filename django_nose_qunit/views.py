@@ -3,7 +3,7 @@ import urllib
 
 from django.conf import settings as django_settings
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
 import nose
@@ -67,3 +67,13 @@ def test_index(request):
         })
     context = {'test_classes': test_classes}
     return render(request, 'django_nose_qunit/list.html', context)
+
+
+def fake_raw_script(request):
+    """
+    Returns a script with a global variable `raw_script` set to true. Used in
+    testing the `raw_script_urls` option.
+    """
+
+    return HttpResponse('var raw_script = true;', 'text/javascript')
+    
