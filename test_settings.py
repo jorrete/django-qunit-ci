@@ -4,7 +4,7 @@ import os
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-
+ALLOWED_HOSTS = ['localhost']
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
