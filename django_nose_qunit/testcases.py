@@ -5,6 +5,7 @@ import requests
 import urllib
 
 from django.core.urlresolvers import reverse
+from django.shortcuts import render
 from django.test import LiveServerTestCase
 from django.test.testcases import QuietWSGIRequestHandler, StoppableWSGIServer
 
@@ -111,11 +112,15 @@ class QUnitTestCase(LiveServerTestCase):
         super(QUnitTestCase, cls).setUpClass()
         registry[qualified_class_name(cls)] = cls
 
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName='runTest', request=None, autostart=False):
         """
         Allow the class to be instantiated without a specified test method so
         the generator function can be run by the nose plugin.
         """
+        # These attributes get used when serving pages interactively
+        self.request = request
+        self.autostart = autostart
+        self.response = None
         if methodName == 'runTest':
             super(QUnitTestCase, self).__init__('generator')
         else:
@@ -181,3 +186,23 @@ class QUnitTestCase(LiveServerTestCase):
         if test['failed'] > 0:
             message = ', '.join(test['failedAssertions'])
             raise self.failureException(message)
+
+    def serve_page(self):
+        """
+        Serve the page with all tests for use in an interactive session.  Runs
+        setUp and tearDown once at appropriate times, so test cases can prepare
+        templates and database fixtures for use by the page as a whole.
+        """
+        class_name = qualified_class_name(self.__class__)
+        context = {
+            'test_file': self.test_file,
+            'title': '%s (%s)' % (class_name, self.test_file),
+            'dependencies': self.dependencies,
+            'raw_script_urls': self.raw_script_urls,
+            'fixtures': self.html_fixtures,
+            'html_strings': self.html_strings,
+            # Can't assume django.core.context_processors.debug is in use
+            'autostart': self.autostart,
+        }
+        self.response = render(self.request, 'django_nose_qunit/template.html',
+                               context)
