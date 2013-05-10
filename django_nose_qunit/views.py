@@ -34,6 +34,10 @@ def run_qunit_tests(request):
         module = importlib.import_module(parts[0])
         cls = getattr(module, parts[1])
     instance = cls('serve_page', request, autostart)
+    if hasattr(cls, 'ran_setup'):
+        # Part of a test run, test runner is handling setUp and tearDown
+        instance.serve_page()
+        return instance.response
     # Run the test to trigger setUp(), tearDown() etc.
     result = instance.defaultTestResult()
     instance(result)

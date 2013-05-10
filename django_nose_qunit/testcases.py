@@ -112,6 +112,9 @@ class QUnitTestCase(LiveServerTestCase):
         super(QUnitTestCase, cls).setUpClass()
         registry[qualified_class_name(cls)] = cls
 
+    def setUp(self):
+        self.__class__.ran_setup = True
+
     def __init__(self, methodName='runTest', request=None, autostart=False):
         """
         Allow the class to be instantiated without a specified test method so
