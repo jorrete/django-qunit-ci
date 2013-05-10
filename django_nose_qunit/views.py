@@ -3,7 +3,7 @@ import urllib
 
 from django.conf import settings as django_settings
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
 import nose
@@ -33,18 +33,11 @@ def run_qunit_tests(request):
         parts = test_class_name.rsplit('.', 1)
         module = importlib.import_module(parts[0])
         cls = getattr(module, parts[1])
-    test_file = cls.test_file
-    context = {
-        'test_file': test_file,
-        'title': '%s (%s)' % (test_class_name, test_file),
-        'dependencies': cls.dependencies,
-        'raw_script_urls': cls.raw_script_urls,
-        'fixtures': cls.html_fixtures,
-        'html_strings': cls.html_strings,
-        # Can't assume django.core.context_processors.debug is in use
-        'autostart': autostart,
-    }
-    return render(request, 'django_nose_qunit/template.html', context)
+    instance = cls('serve_page', request, autostart)
+    # Run the test to trigger setUp(), tearDown() etc.
+    result = instance.defaultTestResult()
+    instance(result)
+    return instance.response
 
 
 def test_index(request):
@@ -67,3 +60,12 @@ def test_index(request):
         })
     context = {'test_classes': test_classes}
     return render(request, 'django_nose_qunit/list.html', context)
+
+
+def fake_raw_script(request):
+    """
+    Returns a script with a global variable `raw_script` set to true. Used in
+    testing the `raw_script_urls` option.
+    """
+
+    return HttpResponse('var raw_script = true;', 'text/javascript')

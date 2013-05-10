@@ -4,6 +4,7 @@ import os
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = ['localhost']
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
@@ -105,7 +106,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'django_nose_qunit.urls'
+ROOT_URLCONF = 'test_urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 #WSGI_APPLICATION = 'django_nose_qunit.wsgi.application'
@@ -164,3 +165,10 @@ LOGGING = {
         },
     }
 }
+
+
+NOSE_ARGS = [
+    '--nocapture',
+    '--failure-detail',
+    '--verbosity=3',
+]
