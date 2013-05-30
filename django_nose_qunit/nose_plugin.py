@@ -158,6 +158,7 @@ class QUnitPlugin(Plugin):
             os.makedirs(screenshot_dir)
         self.phantomjs = Popen([
             settings.QUNIT_PHANTOMJS_PATH,
+            '--debug=true',
             os.path.join(os.path.dirname(__file__), 'run-qunit.js'),
             str(settings.QUNIT_PHANTOMJS_PORT),
             screenshot_dir
