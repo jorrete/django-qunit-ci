@@ -1,79 +1,14 @@
 import json
 import logging
-import os
-import requests
 import urllib
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
-from django.test import LiveServerTestCase
-from django.test.testcases import QuietWSGIRequestHandler, StoppableWSGIServer
 
-from django_nose_qunit.conf import settings
-
-PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
-PHANTOMJS_TIMEOUT = 10
+from sbo_selenium import SeleniumTestCase
 
 logger = logging.getLogger('django.request')
 registry = {}
-
-# First, we need to make some improvements to Django's LiveServerTestCase and
-# the associated code:
-#   1. Log messages from the WSGI request handler instead of ignoring them (the
-#      logger output can be tweaked or suppressed as necessary).
-#   2. Log errors from the WSGI request handler instead of dumping them to
-#      stderr (where they get mixed in with the test results).
-#   3. Don't dump "[Errno 32] Broken pipe" and similar harmless errors from
-#      the WSGI server to the console.
-# I'll try to get some code accepted into Django which does this automatically
-# and/or makes it easier to override.
-
-
-def qwrh_log_exception(self, exc_info):
-    """Implementation of log_exception() for QuietWSGIRequestHandler which logs
-    errors instead of dumping them to stderr (where they get mixed up with the
-    test output).
-    """
-    logger.error('QuietWSGIRequestHandler exception:', exc_info=exc_info)
-
-
-def qwrh_log_message(self, format_string, *args):
-    """ Replacement for QuietWSGIRequestHandler.log_message() to log to file
-    rather than ignore the messages """
-    # Don't bother logging requests for admin images or the favicon.
-    if hasattr(self, 'admin_media_prefix'):
-        # Django 1.4.x
-        admin_prefix = self.admin_media_prefix
-    else:
-        # Django 1.5+
-        admin_prefix = self.admin_static_prefix
-    if (self.path.startswith(admin_prefix) or self.path == '/favicon.ico'):
-        return
-    logger.info(format_string % args)
-
-
-def qwrh_get_stderr(self):
-    """ Anything other than an actual exception trying to write to stderr
-    is probably a captured broken pipe exception or such that can be safely
-    ignored. """
-    return open(os.devnull, 'w')
-
-QuietWSGIRequestHandler.log_exception = qwrh_log_exception
-QuietWSGIRequestHandler.log_message = qwrh_log_message
-QuietWSGIRequestHandler.get_stderr = qwrh_get_stderr
-
-
-def sws_handle_error(self, request, client_address):
-    """ Errors from the WSGI server itself tend to be harmless ones like
-    "[Errno 32] Broken pipe" (which happens when a browser cancels a request
-    before it finishes because it realizes it already has the asset).  By
-    default these get dumped to stderr where they get confused with the test
-    results, but aren't actually treated as test errors.  We'll just ignore
-    them for now.
-    """
-    pass
-
-StoppableWSGIServer.handle_error = sws_handle_error
 
 
 def qualified_class_name(cls):
@@ -84,7 +19,7 @@ def qualified_class_name(cls):
         return cls.__name__
 
 
-class QUnitTestCase(LiveServerTestCase):
+class QUnitTestCase(SeleniumTestCase):
     """
     A test case which runs the QUnit tests in the specified JavaScript files.
     Executes a whole file when the first test case in it is run and caches the
@@ -99,8 +34,6 @@ class QUnitTestCase(LiveServerTestCase):
     injected directly. raw_script_urls are referenced directly (no STATIC_URL
     processing."""
 
-    phantomjs = None
-
     test_file = ''
     dependencies = ()
     raw_script_urls = ()
@@ -113,7 +46,11 @@ class QUnitTestCase(LiveServerTestCase):
         registry[qualified_class_name(cls)] = cls
 
     def setUp(self):
-        self.__class__.ran_setup = True
+        cls = self.__class__
+        cls.ran_setup = True
+        # Only start a webdriver if we're in an actual test run
+        if hasattr(cls, 'server_thread') and not hasattr(cls, 'results'):
+            super(QUnitTestCase, self).setUp()
 
     def __init__(self, methodName='runTest', request=None, autostart=False):
         """
@@ -138,24 +75,29 @@ class QUnitTestCase(LiveServerTestCase):
         url = reverse('django-nose-qunit-test')
         return '%s%s?class=%s' % (address, url, className)
 
+    def _load_case(self):
+        """
+        Load a test case page and wait until the JS is initialized
+        """
+        self.sel.get(self._case_url())
+        self.wait_for_condition('return QUnit.Django.ready')
+
     def generator(self):
         """
-        Load each file in PhantomJS without actually running the tests in order
-        to generate a list of all the test cases.  qunit_case() will be called
-        for each test case in the list.
+        Load each file in the browser without actually running the tests in
+        order to generate a list of all the test cases.  qunit_case() will be
+        called for each test case in the list.
         """
         # Need to start and stop server, since tests aren't running yet
         self.__class__.setUpClass()
+        # Start the webdriver also
+        super(QUnitTestCase, self).setUp()
         try:
-            url = self._case_url()
-            post_data = json.dumps({'action': 'list', 'url': url})
-            r = requests.post(PHANTOMJS_URL, data=post_data)
-            if r.status_code != 200:
-                className = qualified_class_name(self.__class__)
-                msg = 'PhantomJS error in %s: %s' % (className, r.text)
-                raise self.failureException(msg)
-            modules = r.json()
+            self._load_case()
+            script = 'return JSON.stringify(QUnit.Django.modules)'
+            modules = json.loads(self.sel.execute_script(script))
         finally:
+            self.sel.quit()
             self.__class__.tearDownClass()
         for module_name in modules:
             for test_name in modules[module_name]:
@@ -167,13 +109,11 @@ class QUnitTestCase(LiveServerTestCase):
         result for the specific test case described.
         """
         if not hasattr(self.__class__, 'results'):
-            url = self._case_url()
-            params = {'action': 'test', 'url': url}
-            post_data = json.dumps(params)
-            r = requests.post(PHANTOMJS_URL, data=post_data)
-            if r.status_code != 200:
-                raise self.failureException('PhantomJS error: %s' % r.text)
-            self.__class__.results = r.json()
+            self._load_case()
+            self.sel.execute_script('return QUnit.start()')
+            self.wait_for_condition('return QUnit.Django.done')
+            script = 'return JSON.stringify(QUnit.Django.results)'
+            self.__class__.results = json.loads(self.sel.execute_script(script))
         modules = self.results['modules']
         if not module_name in modules:
             msg = 'Unable to find results for module "%s".  All results: %s'

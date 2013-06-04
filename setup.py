@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.4.7'
+version = '1.4.8'
 
 setup(
     name="django-nose-qunit",
@@ -11,7 +11,6 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     package_data={
         'django_nose_qunit': [
-            'run-qunit.js',
             'static/*.css',
             'static/*.js',
             'static/django_nose_qunit/test/*.js',
@@ -20,10 +19,13 @@ setup(
         ],
     },
     zip_safe=False,
+    dependency_links=[
+        'http://pypi.safaribooks.com/packages/',
+    ],
     install_requires=[
-        'Django>=1.4',
+        'Django>=1.5.1,<1.6',
         'django-nose',
-        'requests',
+        'sbo-selenium>=0.3.4',
     ],
     entry_points={
         'nose.plugins.0.10': [

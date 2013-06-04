@@ -1,10 +1,7 @@
 import logging
 import os
 import re
-import requests
 import sys
-import time
-from subprocess import Popen
 
 from nose.case import MethodTestCase, Test
 from nose.failure import Failure
@@ -13,9 +10,7 @@ from nose.plugins.collect import TestSuiteFactory
 from nose.util import test_address
 
 from django_nose_qunit.testcases import QUnitTestCase
-from django_nose_qunit.conf import settings
 
-PHANTOMJS_URL = 'http://127.0.0.1:%s/' % settings.QUNIT_PHANTOMJS_PORT
 log = logging.getLogger('nose.plugins.django_nose_qunit')
 
 
@@ -141,41 +136,4 @@ class QUnitPlugin(Plugin):
 
     def prepareTestLoader(self, loader):
         self.loader = loader
-        return None
-
-    def begin(self):
-        """ Start PhantomJS and clear the log file (if there is one) """
-        log_file = settings.QUNIT_PHANTOMJS_LOG
-        if log_file:
-            log_dir = os.path.dirname(log_file)
-            if log_dir and not os.path.exists(log_dir):
-                os.makedirs(log_dir)
-            self.log_file = open(settings.QUNIT_PHANTOMJS_LOG, 'w')
-        else:
-            self.log_file = open(os.devnull, 'w')
-        screenshot_dir = settings.QUNIT_SCREENSHOT_DIR
-        if screenshot_dir and not os.path.exists(screenshot_dir):
-            os.makedirs(screenshot_dir)
-        self.phantomjs = Popen([
-            settings.QUNIT_PHANTOMJS_PATH,
-            '--debug=true',
-            os.path.join(os.path.dirname(__file__), 'run-qunit.js'),
-            str(settings.QUNIT_PHANTOMJS_PORT),
-            screenshot_dir
-        ], stdout=self.log_file, stderr=self.log_file)
-        # Now wait for it to finish initializing
-        start = time.time()
-        while True:
-            try:
-                r = requests.get(PHANTOMJS_URL)
-                if r.status_code == 200:
-                    break
-            except:
-                if time.time() > start + 10:
-                    raise requests.exceptions.Timeout()
-
-    def finalize(self, result):
-        """ Stop PhantomJS """
-        self.phantomjs.terminate()
-        self.log_file.close()
         return None
