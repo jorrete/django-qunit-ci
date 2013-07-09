@@ -49,7 +49,7 @@ class QUnitTestCase(SeleniumTestCase):
         cls = self.__class__
         cls.ran_setup = True
         # Only start a webdriver if we're in an actual test run
-        if hasattr(cls, 'server_thread') and not hasattr(cls, 'results'):
+        if hasattr(cls, 'server_thread') and not hasattr(cls, 'generating') and not hasattr(cls, 'results'):
             super(QUnitTestCase, self).setUp()
 
     def __init__(self, methodName='runTest', request=None, autostart=False):
@@ -93,10 +93,12 @@ class QUnitTestCase(SeleniumTestCase):
         # Start the webdriver also
         super(QUnitTestCase, self).setUp()
         try:
+            self.__class__.generating = True
             self._load_case()
             script = 'return JSON.stringify(QUnit.Django.modules)'
             modules = json.loads(self.sel.execute_script(script))
         finally:
+            del self.__class__.generating
             self.sel.quit()
             self.__class__.tearDownClass()
         for module_name in modules:

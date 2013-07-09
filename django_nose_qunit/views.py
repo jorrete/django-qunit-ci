@@ -41,6 +41,11 @@ def run_qunit_tests(request):
     # Run the test to trigger setUp(), tearDown() etc.
     result = instance.defaultTestResult()
     instance(result)
+    if not instance.response and len(result.errors) > 0:
+        trace = result.errors[0][1]
+        # Print the error for visibility in interactive testing with DEBUG = False
+        print trace
+        raise Exception(trace)
     return instance.response
 
 
