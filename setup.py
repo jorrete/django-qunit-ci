@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.4.9'
+version = '1.5.0'
 
 setup(
     name="django-nose-qunit",
@@ -25,7 +25,7 @@ setup(
     install_requires=[
         'Django>=1.5.1,<1.6',
         'django-nose',
-        'sbo-selenium>=0.3.4',
+        'sbo-selenium>=0.3.8',
     ],
     entry_points={
         'nose.plugins.0.10': [

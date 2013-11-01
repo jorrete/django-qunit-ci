@@ -1,4 +1,5 @@
 import importlib
+import logging
 import urllib
 
 from django.conf import settings as django_settings
@@ -10,6 +11,8 @@ import nose
 from django_nose_qunit.conf import settings
 from django_nose_qunit.nose_plugin import QUnitIndexPlugin
 from django_nose_qunit.testcases import registry
+
+log = logging.getLogger('django.request')
 
 
 def run_qunit_tests(request):
@@ -43,9 +46,7 @@ def run_qunit_tests(request):
     instance(result)
     if not instance.response and len(result.errors) > 0:
         trace = result.errors[0][1]
-        # Print the error for visibility in interactive testing with DEBUG = False
-        print trace
-        raise Exception(trace)
+        log.error(trace)
     return instance.response
 
 

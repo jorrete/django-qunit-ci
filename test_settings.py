@@ -133,9 +133,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
+LOG_DIR = os.path.join(ROOT_PATH, 'log')
+SELENIUM_LOG_FILE = os.path.join(LOG_DIR, 'tests.log')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING = {
@@ -147,22 +149,46 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
+        # nose installs handlers that only show output for failed tests, but they
+        # can omit errors in setup and teardown; log everything to file also
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': SELENIUM_LOG_FILE,
+            'formatter': 'simple',
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'null': {
-            'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
+        'django.request': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'django_nose_qunit': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
         # Silence "Starting new HTTP connection" messages
         'requests': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'propagate': True,
             'level': 'WARNING',
+        },
+        'sbo_selenium': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
+        'selenium': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'DEBUG',
         },
     }
 }

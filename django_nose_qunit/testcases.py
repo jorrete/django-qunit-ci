@@ -2,6 +2,7 @@ import json
 import logging
 import urllib
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
@@ -80,7 +81,13 @@ class QUnitTestCase(SeleniumTestCase):
         Load a test case page and wait until the JS is initialized
         """
         self.sel.get(self._case_url())
-        self.wait_for_condition('return QUnit.Django.ready')
+        msg = 'There was a problem rendering the page; '
+        log_file = settings.SELENIUM_LOG_FILE
+        if log_file:
+            msg += 'try checking {} for more information'.format(log_file)
+        else:
+            msg += 'set SELENIUM_LOG_FILE to try logging more information'
+        self.wait_for_condition('return QUnit.Django.ready', msg)
 
     def generator(self):
         """
