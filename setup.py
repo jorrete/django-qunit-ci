@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.5.0'
+version = '1.5.1'
 
 setup(
     name="django-nose-qunit",
@@ -23,9 +23,9 @@ setup(
         'http://pypi.safaribooks.com/packages/',
     ],
     install_requires=[
-        'Django>=1.5.1,<1.6',
-        'django-nose',
-        'sbo-selenium>=0.3.8',
+        'Django>=1.6.1,<1.7',
+        'django-nose>=1.2',
+        'sbo-selenium>=0.3.9',
     ],
     entry_points={
         'nose.plugins.0.10': [

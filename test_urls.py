@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import url, patterns
+from django.conf.urls import url, patterns
 from django.conf.urls.static import static
 
 from django_nose_qunit.urls import urlpatterns

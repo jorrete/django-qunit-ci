@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns
+from django.conf.urls import patterns
 
 # This should be safe to leave in the URL configuration even in production;
 # the view always returns a 404 if the test classes haven't been loaded
