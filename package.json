@@ -1,0 +1,23 @@
+{
+  "name": "django-nose-qunit",
+  "version": "1.5.2",
+  "description": "Utilities for running QUnit tests under Jenkins as part of a Django application.",
+  "homepage": "https://github.com/safarijv/django-qunit-ci",
+  "keywords": [
+    "django",
+    "QUnit",
+    "selenium",
+    "TDD",
+    "testing",
+    "tests"
+  ],
+  "bugs": "https://github.com/safarijv/django-qunit-ci/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/safarijv/django-qunit-ci.git"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.4"
+  }
+}
