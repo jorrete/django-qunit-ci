@@ -1,4 +1,5 @@
 recursive-include django_nose_qunit *.html 
 recursive-include django_nose_qunit *.css
 recursive-include django_nose_qunit *.js
-include README.md
+recursive-include requirements *.txt
+include README.rst

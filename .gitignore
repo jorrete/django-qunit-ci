@@ -11,9 +11,14 @@ log
 .*.log.*
 build
 dist
+docs/_build
+docs/javascript
+docs/python
 media
 egg-cache
+node_modules
 storage
+.idea
 .project
 .pydevproject
 .tox

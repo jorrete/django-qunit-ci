@@ -1,4 +1,4 @@
-/*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, regexp: true, nomen: false, onevar: false, undef: true, plusplus: false, white: true, indent: 2 */
+/*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, regexp: true, nomen: false, onevar: false, undef: true, plusplus: false, unused: false, white: true, indent: 2 */
 /*global console module:true QUnit test:true */
 QUnit.Django = {
   done: false,
@@ -13,14 +13,20 @@ QUnit.Django = {
   testCases: {}
 };
 
-// Hack the module and test definition functions so we can get information
-// about the test queue before it's started.  Note that we'll be including
-// even tests which won't be run due to a URL filter, if any.
+/**
+ * Override of QUnit's module definition function so we can get information
+ * about the test queue before it's started.
+ */
 module = function (name, testEnvironment) {
   QUnit.Django.moduleName = name;
   return QUnit.Django.original_module.apply(QUnit, arguments);
 };
 
+/**
+ * Override of QUnit's test definition function so we can get information
+ * about the test queue before it's started.  Note that we'll be including
+ * even tests which won't be run due to a URL filter, if any.
+ */
 test = function (testName, expected, callback, async) {
   var qd = QUnit.Django,
       moduleName = qd.moduleName,
@@ -32,25 +38,34 @@ test = function (testName, expected, callback, async) {
   return qd.original_test.apply(QUnit, arguments);
 };
 
-// To be called before defining any tests or modules.  Intelligently calls
-// QUnit.start() or not depending on whether we're running in a browser or in
-// PhantomJS for a test run
+/**
+ * To be called before defining any tests or modules.  Intelligently calls
+ * QUnit.start() or not depending on whether we're running in a browser or in
+ * PhantomJS for a test run
+ */
 QUnit.Django.start = function () {
   if (QUnit.Django.autostart) {
     QUnit.start();
   }
 };
 
-// To be called after defining any tests or modules.  Lets PhantomJS know that
-// they've all been defined.
+/**
+ * To be called after defining any tests or modules.  Lets PhantomJS know that
+ * they've all been defined.
+ */
 QUnit.Django.end = function () {
   QUnit.Django.ready = true;
 };
 
 // Now collect the test results as the tests are run
 
+/**
+ * Module started callback which initializes a data structure to hold the
+ * results of a test module.
+ *
+ * @param context { name }
+ */
 QUnit.moduleStart(function (context) {
-  // context = { name }
   var name = context.name,
       qd = QUnit.Django,
       modules = qd.results.modules;
@@ -70,8 +85,12 @@ QUnit.moduleStart(function (context) {
   }
 });
 
+/**
+ * Module done callback which collects results data for the module as a whole.
+ *
+ * @param context { name, failed, passed, total }
+ */
 QUnit.moduleDone(function (context) {
-  // context = { name, failed, passed, total }
   var qd = QUnit.Django,
       results = qd.results.modules[context.name];
   results.failed = context.failed;
@@ -79,8 +98,12 @@ QUnit.moduleDone(function (context) {
   results.total = context.total;
 });
 
+/**
+ * Test case started callback which initializes storage of the test results.
+ *
+ * @param context context = { name, module }
+ */
 QUnit.testStart(function (context) {
-  // context = { name, module }
   var qd = QUnit.Django,
       moduleName = context.module ? context.module : '',
       modules = qd.results.modules;
@@ -98,8 +121,12 @@ QUnit.testStart(function (context) {
   }
 });
 
+/**
+ * Test case end callback which stores the results of an individual test.
+ *
+ * @param result { name, module, failed, passed, total, duration }
+ */
 QUnit.testDone(function (result) {
-  // result = { name, module, failed, passed, total, duration }
   var qd = QUnit.Django,
       moduleName = result.module ? result.module : '',
       module = qd.results.modules[moduleName];
@@ -116,8 +143,12 @@ QUnit.testDone(function (result) {
   module.time += result.duration;
 });
 
+/**
+ * Test result logging callback which gives information about test failures.
+ *
+ * @param details { result, actual, expected, message }
+ */
 QUnit.log(function (details) {
-  //details = { result, actual, expected, message }
   if (details.result) {
     return;
   }
@@ -136,13 +167,19 @@ QUnit.log(function (details) {
   console.log("QUnit Screenshot:" + filename);
 });
 
+/**
+ * Callback for the end of the test suite.  Stores overall results and sets
+ * a variable which the Django test runner can query to determine that all
+ * tests on the page have finished.
+ *
+ * @param details { failed, passed, total, runtime }
+ */
 QUnit.done(function (details) {
-  //details = { failed, passed, total, runtime }
   var qd = QUnit.Django,
       results = qd.results;
-  results.failed = details.failed,
-  results.passed = details.passed,
-  results.total = details.total,
+  results.failed = details.failed;
+  results.passed = details.passed;
+  results.total = details.total;
   results.time = details.runtime / 1000;
   qd.done = true;
 });

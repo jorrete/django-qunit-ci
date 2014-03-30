@@ -1,6 +1,18 @@
+#!/usr/bin/env python
+
+import os
+from pip.index import PackageFinder
+from pip.req import parse_requirements
 from setuptools import setup, find_packages
 
-version = '1.5.1'
+root_dir = os.path.abspath(os.path.dirname(__file__))
+requirements_path = os.path.join(root_dir, 'requirements', 'base.txt')
+
+finder = PackageFinder([], [])
+requirements = parse_requirements(requirements_path, finder)
+install_requires = [str(r.req) for r in requirements]
+
+version = '1.5.2'
 
 setup(
     name="django-nose-qunit",
@@ -8,6 +20,20 @@ setup(
     author="Jeremy Bowman",
     author_email="jbowman@safaribooksonline.com",
     description="Integrate QUnit JavaScript tests into a Django test suite via nose",
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Software Development :: Testing',
+    ],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    url='https://github.com/safarijv/django-qunit-ci',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     package_data={
         'django_nose_qunit': [
@@ -19,27 +45,11 @@ setup(
         ],
     },
     zip_safe=False,
-    dependency_links=[
-        'http://pypi.safaribooks.com/packages/',
-    ],
-    install_requires=[
-        'Django>=1.6.1,<1.7',
-        'django-nose>=1.2',
-        'sbo-selenium>=0.3.9',
-    ],
+    install_requires=install_requires,
     entry_points={
         'nose.plugins.0.10': [
             'django-qunit = django_nose_qunit.nose_plugin:QUnitPlugin',
             'django-qunit-index = django_nose_qunit.nose_plugin:QUnitIndexPlugin'
         ]
     },
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Framework :: Django',
-        'Topic :: Software Development :: Testing',
-    ],
 )

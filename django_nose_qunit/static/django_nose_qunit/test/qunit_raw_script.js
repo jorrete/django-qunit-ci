@@ -1,3 +1,4 @@
+/*global raw_script */
 QUnit.Django.start();
 
 test("raw_script_urls test: django URL", function () {
