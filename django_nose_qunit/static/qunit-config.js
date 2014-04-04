@@ -39,6 +39,19 @@ test = function (testName, expected, callback, async) {
 };
 
 /**
+ * Override of QUnit's asyncTest definition function so we can get information
+ * about the test queue before it's started.  Note that we'll be including
+ * even tests which won't be run due to a URL filter, if any.
+ */
+asyncTest = function (testName, expected, callback) {
+  if (arguments.length === 2) {
+		callback = expected;
+		expected = null;
+	}
+  return test(testName, expected, callback, true);
+};
+
+/**
  * To be called before defining any tests or modules.  Intelligently calls
  * QUnit.start() or not depending on whether we're running in a browser or in
  * PhantomJS for a test run
@@ -146,7 +159,7 @@ QUnit.testDone(function (result) {
 /**
  * Test result logging callback which gives information about test failures.
  *
- * @param details { result, actual, expected, message }
+ * @param details { result, actual, expected, message, source, module, name }
  */
 QUnit.log(function (details) {
   if (details.result) {
@@ -159,7 +172,10 @@ QUnit.log(function (details) {
     if (message) {
       message += ", ";
     }
-    message = "expected: " + JSON.stringify(details.expected) + ", but was: " + JSON.stringify(details.actual);
+    else {
+      message = "";
+    }
+    message += "expected: " + JSON.stringify(details.expected) + ", but was: " + JSON.stringify(details.actual);
   }
   qd.screenshot_number += 1;
   message += " (" + filename + ")";
