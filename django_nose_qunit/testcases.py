@@ -81,12 +81,7 @@ class QUnitTestCase(SeleniumTestCase):
         Load a test case page and wait until the JS is initialized
         """
         self.sel.get(self._case_url())
-        msg = 'There was a problem rendering the page; '
-        log_file = settings.SELENIUM_LOG_FILE
-        if log_file:
-            msg += 'try checking {} for more information'.format(log_file)
-        else:
-            msg += 'set SELENIUM_LOG_FILE to try logging more information'
+        msg = """There was a problem rendering the page; check the log for more information (make sure that at least one handler is logging "django.request" messages to file or another persistent source)"""
         self.wait_for_condition('return QUnit.Django.ready', msg)
 
     def generator(self):

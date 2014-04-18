@@ -134,7 +134,6 @@ INSTALLED_APPS = (
 )
 
 LOG_DIR = os.path.join(ROOT_PATH, 'log')
-SELENIUM_LOG_FILE = os.path.join(LOG_DIR, 'tests.log')
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
@@ -153,7 +152,7 @@ LOGGING = {
         # can omit errors in setup and teardown; log everything to file also
         'file': {
             'class': 'logging.FileHandler',
-            'filename': SELENIUM_LOG_FILE,
+            'filename': os.path.join(LOG_DIR, 'tests.log'),
             'formatter': 'simple',
             'level': 'DEBUG',
         },
