@@ -11,8 +11,6 @@ NOSE_PLUGINS = [
     'django_nose_qunit.QUnitPlugin'
 ]
 QUNIT_DYNAMIC_REGISTRY = True
-QUNIT_PHANTOMJS_LOG = 'phantomjs.log'
-QUNIT_SCREENSHOT_DIR = '.'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -83,7 +81,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -93,7 +90,6 @@ SECRET_KEY = 'f9f22f75-56c9-11e2-9217-20c9d0480163'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -107,9 +103,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'test_urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-#WSGI_APPLICATION = 'django_nose_qunit.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -136,6 +129,7 @@ INSTALLED_APPS = (
 LOG_DIR = os.path.join(ROOT_PATH, 'log')
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
+SELENIUM_SCREENSHOT_DIR = os.path.join(LOG_DIR, 'screenshots')
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.

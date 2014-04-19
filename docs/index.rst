@@ -13,6 +13,7 @@ Contents:
    Python API <python/modules>
    JavaScript API <javascript/index>
    JavaScript File Listing <javascript/files>
+   CHANGELOG
 
 
 Indices and tables

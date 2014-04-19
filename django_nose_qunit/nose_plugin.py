@@ -54,7 +54,9 @@ class QUnitIndexPlugin(Plugin):
     name = 'django-qunit-index'
     qunit_test_classes = []
 
-    def options(self, parser, env=os.environ):
+    def options(self, parser, env=None):
+        if env is None:
+            env = os.environ
         super(QUnitIndexPlugin, self).options(parser, env=env)
 
     def configure(self, options, conf):
@@ -105,7 +107,9 @@ class QUnitPlugin(Plugin):
 
     name = 'django-qunit'
 
-    def options(self, parser, env=os.environ):
+    def options(self, parser, env=None):
+        if env is None:
+            env = os.environ
         super(QUnitPlugin, self).options(parser, env=env)
 
     def configure(self, options, conf):

@@ -12,7 +12,7 @@ finder = PackageFinder([], [])
 requirements = parse_requirements(requirements_path, finder)
 install_requires = [str(r.req) for r in requirements]
 
-version = '1.5.3'
+version = '1.5.4'  # Update docs/CHANGELOG.rst if you increment the version
 
 setup(
     name="django-nose-qunit",

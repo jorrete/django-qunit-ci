@@ -2,7 +2,6 @@ import json
 import logging
 import urllib
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
@@ -119,12 +118,12 @@ class QUnitTestCase(SeleniumTestCase):
             script = 'return JSON.stringify(QUnit.Django.results)'
             self.__class__.results = json.loads(self.sel.execute_script(script))
         modules = self.results['modules']
-        if not module_name in modules:
+        if module_name not in modules:
             msg = 'Unable to find results for module "%s".  All results: %s'
             msg = msg % (module_name, json.dumps(self.results))
             raise self.failureException(msg)
         tests = modules[module_name]['tests']
-        if not test_name in tests:
+        if test_name not in tests:
             msg = 'Unable to find results for test "%s" in module "%s". '
             msg += 'Results for that module: %s'
             msg = msg % (test_name, module_name, json.dumps(self.results))

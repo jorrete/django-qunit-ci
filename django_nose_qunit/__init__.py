@@ -1,2 +1,2 @@
-from nose_plugin import QUnitPlugin
-from testcases import QUnitTestCase
+from nose_plugin import QUnitPlugin  # flake8: noqa
+from testcases import QUnitTestCase  # flake8: noqa

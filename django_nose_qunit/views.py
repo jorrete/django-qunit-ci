@@ -18,8 +18,8 @@ log = logging.getLogger('django.request')
 def run_qunit_tests(request):
     """
     Serve a page for running the specified QUnit test file, with JavaScript
-    dependencies and HTML fixtures & strings as given in the named test class.  Returns
-    a 404 whenever an unknown test class is requested; should only
+    dependencies and HTML fixtures & strings as given in the named test class.
+    Returns a 404 whenever an unknown test class is requested; should only
     happen if somebody is trying to guess URLs.
     """
     test_class_name = urllib.unquote(request.GET.get('class', ''))
@@ -28,7 +28,7 @@ def run_qunit_tests(request):
         autostart = django_settings.DEBUG
     else:
         autostart = True if 'true' else False
-    if not settings.QUNIT_DYNAMIC_REGISTRY and not test_class_name in registry:
+    if not settings.QUNIT_DYNAMIC_REGISTRY and test_class_name not in registry:
         raise Http404('No such QUnit test case: ' + test_class_name)
     if test_class_name in registry:
         cls = registry[test_class_name]
