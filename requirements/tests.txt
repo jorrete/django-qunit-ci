@@ -18,7 +18,7 @@ virtualenv==1.11.4
 
 # Exact versions of the base dependencies
 
-sbo-selenium==0.4.1
+sbo-selenium==0.4.2
 
 # Direct dependencies for running tests
 
