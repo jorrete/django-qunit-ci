@@ -22,7 +22,7 @@ Installation
 5. Add an entry to your URL configuration::
 
         from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
-        urlpatterns += qunit_urlpatterns()
+        urlpatterns += qunit_urlpatterns
 
    This adds new URLs of the form ``/qunit/*``, and they return a 404
    unless ``DEBUG`` is True or QUnit tests have been initialized as part of a
