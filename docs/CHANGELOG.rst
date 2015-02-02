@@ -1,6 +1,10 @@
 django-nose-qunit Changelog
 ===========================
 
+1.5.5 (2015-01-30)
+------------------
+Fixed compatibility with pip 6.x
+
 1.5.4 (2014-04-19)
 ------------------
 * Support for sbo-selenium 0.4.1

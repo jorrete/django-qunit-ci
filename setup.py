@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from pip.download import PipSession
 from pip.index import PackageFinder
 from pip.req import parse_requirements
 from setuptools import setup, find_packages
@@ -8,11 +9,12 @@ from setuptools import setup, find_packages
 root_dir = os.path.abspath(os.path.dirname(__file__))
 requirements_path = os.path.join(root_dir, 'requirements', 'base.txt')
 
-finder = PackageFinder([], [])
-requirements = parse_requirements(requirements_path, finder)
+session = PipSession()
+finder = PackageFinder([], [], session=session)
+requirements = parse_requirements(requirements_path, finder, session=session)
 install_requires = [str(r.req) for r in requirements]
 
-version = '1.5.4'  # Update docs/CHANGELOG.rst if you increment the version
+version = '1.5.5'  # Update docs/CHANGELOG.rst if you increment the version
 
 setup(
     name="django-nose-qunit",
