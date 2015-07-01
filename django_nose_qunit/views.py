@@ -1,6 +1,5 @@
 import importlib
 import logging
-import urllib
 
 from django.conf import settings as django_settings
 from django.core.urlresolvers import reverse
@@ -11,6 +10,7 @@ import nose
 from django_nose_qunit.conf import settings
 from django_nose_qunit.nose_plugin import QUnitIndexPlugin
 from django_nose_qunit.testcases import registry
+from six.moves.urllib.parse import unquote
 
 log = logging.getLogger('django.request')
 
@@ -22,7 +22,7 @@ def run_qunit_tests(request):
     Returns a 404 whenever an unknown test class is requested; should only
     happen if somebody is trying to guess URLs.
     """
-    test_class_name = urllib.unquote(request.GET.get('class', ''))
+    test_class_name = unquote(request.GET.get('class', ''))
     autostart = request.GET.get('autostart', '')
     if autostart == '':
         autostart = django_settings.DEBUG

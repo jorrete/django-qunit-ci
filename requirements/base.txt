@@ -1,7 +1,30 @@
 # Core dependencies common to all Python interpreters
 
-# As a public package, version requirements are rather lax
-# The currently preferred versions are specified in tests.txt for testing
+# Python packaging utilities
+setuptools==17.0
+
+# Package manager
+pip==7.0.3
+
+# Indirect dependencies first, exact versions for consistency
+
+# The Django version is set by tox and by git-hooks/post-merge, because we
+# test multiple versions of it
+
+# django-nose
+nose==1.3.7
+
+# sbo-selenium
+requests==2.7.0
+selenium==2.46.0
+
+# And now the direct dependencies
+
+# Test runner
+django-nose==1.4.1
 
 # Support for Selenium tests as django-nose test cases
-sbo-selenium>=0.4.0
+sbo-selenium==0.5.0
+
+# For python 2 and 3 compatibility
+six==1.9.0

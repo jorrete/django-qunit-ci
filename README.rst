@@ -19,6 +19,12 @@ Installation
             'django_nose_qunit.QUnitPlugin'
         ]
 
+   and the ``NOSE_ARGS`` Django setting::
+
+        NOSE_ARGS = [
+            '--with-django-qunit',
+        ]
+
 5. Add an entry to your URL configuration::
 
         from django_nose_qunit.urls import urlpatterns as qunit_urlpatterns
@@ -58,7 +64,7 @@ HTML fixture templates are listed in the ``html_fixtures`` attribute.
 
 Running Unit Tests
 ------------------
-Add ``--with-django-qunit`` to your normal test execution command (using
+Use your normal test execution command (using
 django-admin.py or manage.py).  Execution can be restricted to one or more
 specified packages and/or classes as normal ("myapp", "myapp.tests.qunit",
 "myapp.tests.qunit:MyTestCase", etc.).  There is currently no support for
