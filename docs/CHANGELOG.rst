@@ -1,6 +1,12 @@
 django-nose-qunit Changelog
 ===========================
 
+1.6.0 (2015-07-01)
+------------------
+* Support Python 3
+* Verified Django 1.7 and 1.8 compatibility when using sbo-selenium 0.5.0
+* QUnit 1.18.0 upgrade
+
 1.5.5 (2015-01-30)
 ------------------
 Fixed compatibility with pip 6.x

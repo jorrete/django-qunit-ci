@@ -1,8 +1,9 @@
-*.DS_Store
+.DS_Store
 *.egg-info
+.#*
+\#*
 *~
-*.pyc
-*.pyo
+*.py[cod]
 ve
 *.sqlite.db
 log
@@ -18,7 +19,11 @@ media
 egg-cache
 node_modules
 storage
+.coverage
 .idea
+.noseids
 .project
 .pydevproject
+.ropeproject
+.settings
 .tox

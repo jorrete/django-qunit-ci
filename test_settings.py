@@ -191,4 +191,5 @@ NOSE_ARGS = [
     '--nocapture',
     '--failure-detail',
     '--verbosity=3',
+    '--with-django-qunit',
 ]

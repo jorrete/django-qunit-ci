@@ -1,11 +1,11 @@
 import json
 import logging
-import urllib
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
 from sbo_selenium import SeleniumTestCase
+from six.moves.urllib.parse import quote
 
 logger = logging.getLogger('django.request')
 registry = {}
@@ -71,7 +71,7 @@ class QUnitTestCase(SeleniumTestCase):
         Get the live test server URL for this test case's QUnit test file.
         """
         address = self.live_server_url
-        className = urllib.quote(qualified_class_name(self.__class__), safe='')
+        className = quote(qualified_class_name(self.__class__), safe='')
         url = reverse('django-nose-qunit-test')
         return '%s%s?class=%s' % (address, url, className)
 
