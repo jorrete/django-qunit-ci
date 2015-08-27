@@ -2,16 +2,28 @@
 
 # Indirect dependencies first, exact versions for consistency
 
+# ipdb -> ipython -> pickleshare
+path.py==8.1
+
+# ipdb -> ipython -> traitlets
+decorator==4.0.2
+ipython-genutils==0.1.0
+
 # ipdb -> ipython
+appnope==0.1.0; sys_platform == 'darwin'
 gnureadline==6.3.3; sys_platform == 'darwin'
+pexpect==3.3; sys_platform != 'win32'
+pickleshare==0.5
+simplegeneric==0.8.1
+traitlets==4.0.0
 
 # ipdb
-ipython==3.2.1
+ipython==4.0.0
 
 # tox
 pluggy==0.3.0
 py==1.4.30
-virtualenv==13.1.0
+virtualenv==13.1.2
 
 # Direct dependencies for running tests
 
