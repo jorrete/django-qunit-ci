@@ -19,6 +19,7 @@ media
 egg-cache
 node_modules
 storage
+.cache
 .coverage
 .idea
 .noseids

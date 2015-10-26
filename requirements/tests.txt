@@ -3,10 +3,10 @@
 # Indirect dependencies first, exact versions for consistency
 
 # ipdb -> ipython -> pickleshare
-path.py==8.1
+path.py==8.1.2
 
 # ipdb -> ipython -> traitlets
-decorator==4.0.2
+decorator==4.0.4
 ipython-genutils==0.1.0
 
 # ipdb -> ipython
@@ -20,15 +20,7 @@ traitlets==4.0.0
 # ipdb
 ipython==4.0.0
 
-# tox
-pluggy==0.3.0
-py==1.4.30
-virtualenv==13.1.2
-
 # Direct dependencies for running tests
 
 # A better debugger
 ipdb==0.8.1
-
-# For managing test environments
-tox==2.1.1
