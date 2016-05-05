@@ -1,11 +1,14 @@
 import os
+import socket
 
 # Django settings for django_nose_qunit tests
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = ['localhost']
+IP_ADDRESS = socket.gethostbyname(socket.gethostname())
+ALLOWED_HOSTS = ['localhost', IP_ADDRESS]
 
+DJANGO_LIVE_TEST_SERVER_ADDRESS = '{}:9090'.format(IP_ADDRESS)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = [
     'django_nose_qunit.QUnitPlugin'
